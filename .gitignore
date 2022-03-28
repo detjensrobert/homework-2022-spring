@@ -2,6 +2,7 @@ latex.out
 texout
 *.pdf
 .vscode
+__pandoc_run__
 
 # libreoffice lock/swapfile
 .~lock.*
