@@ -1,14 +1,16 @@
-simple-openmp: simple-openmp.cpp
-	g++ -o simple-openmp simple-openmp.cpp -fopenmp
+BIN_NAME = simple-openmp
 
-simple-openmp-%t: simple-openmp.cpp
-	g++ -o $@ simple-openmp.cpp -fopenmp -DNUMT=$* -DQUIET
+$(BIN_NAME): $(BIN_NAME).cpp
+	g++ -o $(BIN_NAME) $(BIN_NAME).cpp -fopenmp
 
-out.%t: simple-openmp-%t
-	./simple-openmp-$*t > $@
+$(BIN_NAME)-%t: $(BIN_NAME).cpp
+	g++ -o $@ $(BIN_NAME).cpp -fopenmp -DNUMT=$* -DQUIET
 
-bench: simple-openmp-1t simple-openmp-4t
-	hyperfine --export-markdown results.md ./simple-openmp-1t ./simple-openmp-4t
+out.%t: $(BIN_NAME)-%t
+	./$(BIN_NAME)-$*t > $@
+
+bench: $(BIN_NAME)-1t $(BIN_NAME)-4t
+	hyperfine --export-markdown results.md ./$(BIN_NAME)-1t ./$(BIN_NAME)-4t
 
 report: report.md out.1t out.4t
 	pandoc -o report.pdf -s report.md -V geometry:margin=1in --highlight=tango -F pandoc-include -F pandoc-run-filter

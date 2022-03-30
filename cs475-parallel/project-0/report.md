@@ -6,7 +6,7 @@
 
 ### What machine was this ran on?
 
-This was done on a Ryzen 2600 running Arch Linux.
+This was done on an Intel i7-1165G7 running Fedora Linux.
 
 ### What performance results did you get?
 
@@ -29,7 +29,7 @@ print(f"Speedup factor: {round(sf, 3)}")
 ### If the 4-thread-to-one-thread speedup is less than 4.0, why do you think it is this way?
 
 Not all of the code is parallelized, such as the array initialization or doing the timings. This part always runs
-linearly regardless of how many threads OpenMP is using, and will not benefit from any speed-up.
+linearly regardless of how many threads OpenMP is using, and will not benefit from any speed-up. Additionally, multi-threaded loads may cause the processor to not boost as high.
 
 ### What was your Parallel Fraction, $Fp$?
 
