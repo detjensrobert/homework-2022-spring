@@ -26,7 +26,20 @@
 #endif
 
 // ranges for the random numbers:
-const float ? ? ? ? ? = ? ? ? ? ? ;
+const float TXMIN = -10.;
+const float TXMAX = 10.;
+
+const float TXVMIN = 10.;
+const float TXVMAX = 30.;
+
+const float TYMIN = 45.;
+const float TYMAX = 55.;
+
+const float SVMIN = 10.;
+const float SVMAX = 30.;
+
+const float STHMIN = 10.;
+const float STHMAX = 90.;
 
 // degrees-to-radians:
 inline float Radians(float d) { return (M_PI / 180.f) * d; }
@@ -95,12 +108,8 @@ int main(int argc, char *argv[]) {
   double maxPerformance = 0.; // must be declared outside the NUMTIMES loop
   int numHits;                // must be declared outside the NUMTIMES loop
 
-  // get ready to record the maximum performance and the probability:
-  double maxPerformance = 0.; // must be declared outside the NUMTIMES loop
-  int numHits;                // must be declared outside the NUMTIMES loop
-
   // looking for the maximum performance:
-  for (int times = 0; times < NUMTIMES; times++) {
+  for (int times = 0; times < NUMTRIES; times++) {
     double time0 = omp_get_wtime();
 
     numHits = 0;
@@ -127,11 +136,11 @@ int main(int argc, char *argv[]) {
       float sbx = svx * t;
       // does the snowball hit the truck (just check x
       // distances, not height):
-          if (fabs(? ? ? ? ?) < ? ? ? ? ?) {
-            numHits++;
-            if (DEBUG)
-              fprintf(stderr, "Hits the truck at time = %8.3f\n", t);
-          }
+      if (fabs(sbx - truckx) < 20) {
+        numHits++;
+        if (DEBUG)
+          fprintf(stderr, "Hits the truck at time = %8.3f\n", t);
+      }
     } // for( # of  monte carlo trials )
 
     double time1 = omp_get_wtime();
@@ -141,9 +150,16 @@ int main(int argc, char *argv[]) {
 
   } // for ( # of timing tries )
 
-  float probability =
-      (float)numHits / (float)(NUMTRIALS); // just get for last NUMTIMES run
+  // just get for last NUMTIMES run
+  float probability = (float)numHits / (float)(NUMTRIALS);
+#ifndef QUIET
   fprintf(stderr,
-          "%2d threads : %8d trials ; probability = %6.2f%% ; megatrials/sec = "
-          "%6.2lf\n",
+          "%2d threads : %8d trials ; "
+          "probability = %6.2f%% ; megatrials/sec = %6.2lf\n",
           NUMT, NUMTRIALS, 100. * probability, maxPerformance);
+#endif
+#ifdef CSV
+  printf("%d,%d,%.2f,%.2lf\n", NUMT, NUMTRIALS, 100. * probability,
+         maxPerformance);
+#endif
+}
