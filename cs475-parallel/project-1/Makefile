@@ -21,8 +21,12 @@ bench results.csv: $(BIN_NAME).cpp
 	# hyperfine -N --export-csv results.hyp.csv bin/*
 	for f in bin/*; do ./$$f >> results.csv; done
 
+pivot.csv: results.csv
+	mlr --icsv --ocsv cut -f trials,performance,threads \
+		then sort -n trials then reshape -s threads,performance \
+		results.csv > pivot.csv
 
-report: report.md results.csv
+report: report.md results.csv pivot.csv
 	pandoc -o report.pdf -s report.md -V geometry:margin=1in --highlight=tango -F pandoc-include -F pandoc-run-filter
 
 .PHONY: clean

@@ -50,6 +50,7 @@ Compute Fp, the Parallel Fraction, for this computation.
       grid = major,
       grid style = {dashed,gray!30},
       legend pos = outer north east,
+      legend cell align = left
     ]
       \foreach \N in {\threads}{
         \addplot table[x=trials,y=performance,col sep=comma,discard if not={0}{\N}] {results.csv};
@@ -70,29 +71,13 @@ Compute Fp, the Parallel Fraction, for this computation.
       grid = major,
       grid style = {dashed,gray!30},
       legend pos = outer north east,
+      legend cell align = left
     ]
-      \foreach \N in {\trials}{
-        \addplot table[x=threads,y=performance,col sep=comma,discard if not={1}{\N}] {results.csv};
-        \addlegendentryexpanded{\N \ trials}
-      }
+
+    \addplot table[col sep=comma] {pivot.csv};
+    \addlegendentryexpanded{1 \ trials}
+
     \end{axis}
   \end{tikzpicture}
   \caption{Threads vs Performance across different numbers of trials}
 \end{figure}
-
-
-
-<!-- \begin{tikzpicture}
-\begin{axis}[
-    title = {Threads vs. Performance across different trial counts},
-    axis lines = left,
-    xlabel = {Threads Used},
-    ylabel = {Performance (MT/s)},
-    grid = major,
-    grid style = {dashed,gray!30},
-]
-  \foreach \N in {\threads}{
-    \addplot table[x=threads,y=performance,col sep=comma] {results.csv};
-  }
-\end{axis}
-\end{tikzpicture} -->

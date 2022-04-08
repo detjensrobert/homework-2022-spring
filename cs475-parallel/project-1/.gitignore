@@ -2,4 +2,4 @@ montecarlo
 bin/
 out
 out.*
-results.*
+*.csv
