@@ -18,14 +18,23 @@ Do a table and two graphs. The two graphs need to be:
 
 (See the Project Notes to see an example of this and how to get Excel to do most of the work for you.)
 
-Chosing one of the runs (the one with the maximum number of trials would be good), tell me what you think the actual probability is.
+Choosing one of the runs (the one with the maximum number of trials would be good), tell me what you think the actual probability is.
 
 Compute Fp, the Parallel Fraction, for this computation.
 
-\pagebreak
+\newcommand{\threads}{THREADREPLACE}
+\newcommand{\trials}{TRIALREPLACE}
 
 \pgfplotsset{
-  discard if not/.style 2 args={
+  axis lines = left,
+  grid = major,
+  grid style = {dashed,gray!30},
+  legend pos = outer north east,
+  legend cell align = left,
+}
+
+\pgfplotsset{
+  groupby/.style 2 args={
     x filter/.code={
       \edef\tempa{\thisrowno{#1}}
       \edef\tempb{#2}
@@ -37,23 +46,15 @@ Compute Fp, the Parallel Fraction, for this computation.
   }
 }
 
-\newcommand{\threads}{1,2,4,8}
-\newcommand{\trials}{1,10,100,1000,10000,100000,1000000}
-
 \begin{figure}[h]
   \centering
   \begin{tikzpicture}
     \begin{semilogxaxis}[
-      axis lines = left,
-      xlabel = {No. of Monte-Carlo trials},
+      xlabel = {No. of Monte-Carlo trials (log)},
       ylabel = {Performance (MT/s)},
-      grid = major,
-      grid style = {dashed,gray!30},
-      legend pos = outer north east,
-      legend cell align = left
     ]
       \foreach \N in {\threads}{
-        \addplot table[x=trials,y=performance,col sep=comma,discard if not={0}{\N}] {results.csv};
+        \addplot table[x=trials,y=performance,col sep=comma,groupby={0}{\N}] {results.csv};
         \addlegendentryexpanded{\N \ threads}
       }
     \end{semilogxaxis}
@@ -65,18 +66,13 @@ Compute Fp, the Parallel Fraction, for this computation.
   \centering
   \begin{tikzpicture}
     \begin{axis}[
-      axis lines = left,
       xlabel = {Threads used},
       ylabel = {Performance (MT/s)},
-      grid = major,
-      grid style = {dashed,gray!30},
-      legend pos = outer north east,
-      legend cell align = left
     ]
-
-    \addplot table[col sep=comma] {pivot.csv};
-    \addlegendentryexpanded{1 \ trials}
-
+      \foreach \N in {\trials}{
+        \addplot table[x=threads,y=performance,col sep=comma,groupby={1}{\N}] {results.csv};
+        \addlegendentryexpanded{\N \ trials}
+      }
     \end{axis}
   \end{tikzpicture}
   \caption{Threads vs Performance across different numbers of trials}

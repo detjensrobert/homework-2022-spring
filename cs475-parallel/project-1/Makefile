@@ -1,6 +1,6 @@
 BIN_NAME = montecarlo
 
-THREADS = 1 2 4 8 # 12 16 20 24 32
+THREADS = 1 2 4 8 # 12 # 16 20 24 32
 TRIALS = 1 10 100 1000 10000 100000 1000000
 
 $(BIN_NAME): $(BIN_NAME).cpp
@@ -26,8 +26,16 @@ pivot.csv: results.csv
 		then sort -n trials then reshape -s threads,performance \
 		results.csv > pivot.csv
 
-report: report.md results.csv pivot.csv
-	pandoc -o report.pdf -s report.md -V geometry:margin=1in --highlight=tango -F pandoc-include -F pandoc-run-filter
+null  :=
+space := $(null) #
+comma := ,
+
+# do funky sed magic to update the thread/trial count in the doc w the vars here
+report: report.md results.csv # pivot.csv
+	cat report.md | \
+	sed 's/THREADREPLACE/$(subst $(space),$(comma),$(strip $(THREADS)))/' | \
+	sed 's/TRIALREPLACE/$(subst $(space),$(comma),$(strip $(TRIALS)))/' | \
+	pandoc -s - -o report.pdf -V geometry:margin=1in --highlight=tango -F pandoc-include -F pandoc-run-filter
 
 .PHONY: clean
 clean:
