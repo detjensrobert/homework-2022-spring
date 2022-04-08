@@ -18,7 +18,7 @@ bench results.csv: $(BIN_NAME).cpp
 	  ::: $(THREADS) ::: $(TRIALS)
 
 	# run one trial at a time
-	hyperfine -N --export-csv results.hyp.csv bin/*
+	# hyperfine -N --export-csv results.hyp.csv bin/*
 	for f in bin/*; do ./$$f >> results.csv; done
 
 

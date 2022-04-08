@@ -22,6 +22,8 @@ Chosing one of the runs (the one with the maximum number of trials would be good
 
 Compute Fp, the Parallel Fraction, for this computation.
 
+\pagebreak
+
 \pgfplotsset{
   discard if not/.style 2 args={
     x filter/.code={
@@ -36,24 +38,47 @@ Compute Fp, the Parallel Fraction, for this computation.
 }
 
 \newcommand{\threads}{1,2,4,8}
+\newcommand{\trials}{1,10,100,1000,10000,100000,1000000}
 
-\begin{tikzpicture}
-\begin{semilogxaxis}[
-    title = {Trials vs. Performance across different thread counts},
-    axis lines = left,
-    xlabel = {Monte Carlo trials},
-    ylabel = {Performance (MT/s)},
-    grid = major,
-    grid style = {dashed,gray!30},
-    legend style={at={(1.3,0.5)},anchor=east}
-]
-  \foreach \N in {\threads}{
-    \addplot table[x=trials,y=performance,col sep=comma,discard if not={0}{\N}] {results.csv};
-    \addlegendentryexpanded{\N th}
-  }
-\end{semilogxaxis}
-\end{tikzpicture}
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \begin{semilogxaxis}[
+      axis lines = left,
+      xlabel = {No. of Monte-Carlo trials},
+      ylabel = {Performance (MT/s)},
+      grid = major,
+      grid style = {dashed,gray!30},
+      legend pos = outer north east,
+    ]
+      \foreach \N in {\threads}{
+        \addplot table[x=trials,y=performance,col sep=comma,discard if not={0}{\N}] {results.csv};
+        \addlegendentryexpanded{\N \ threads}
+      }
+    \end{semilogxaxis}
+  \end{tikzpicture}
+  \caption{Trials vs Performance across different numbers of threads}
+\end{figure}
 
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      axis lines = left,
+      xlabel = {Threads used},
+      ylabel = {Performance (MT/s)},
+      grid = major,
+      grid style = {dashed,gray!30},
+      legend pos = outer north east,
+    ]
+      \foreach \N in {\trials}{
+        \addplot table[x=threads,y=performance,col sep=comma,discard if not={1}{\N}] {results.csv};
+        \addlegendentryexpanded{\N \ trials}
+      }
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Threads vs Performance across different numbers of trials}
+\end{figure}
 
 
 
