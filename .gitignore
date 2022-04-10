@@ -9,3 +9,5 @@ __pandoc_run__
 
 # pandoc pres
 *.html
+
+.gdb_history

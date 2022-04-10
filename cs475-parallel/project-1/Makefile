@@ -1,6 +1,6 @@
 BIN_NAME = montecarlo
 
-THREADS = 1 2 4 8 # 12 # 16 20 24 32
+THREADS = 1 2 4 8 12 16 20 24 32
 TRIALS = 1 10 100 1000 10000 100000 1000000
 
 $(BIN_NAME): $(BIN_NAME).cpp
@@ -11,9 +11,11 @@ $(BIN_NAME)-%t: $(BIN_NAME).cpp
 
 bench results.csv: $(BIN_NAME).cpp
 	[ -d bin ] || mkdir bin
-	echo 'threads,trials,probability,performance' > results.csv 				# remove previous resuts
 
-	# compile stuff in parallel
+	# remove previous resuts
+	echo 'threads,trials,probability,performance' > results.csv
+
+
 	parallel g++ -o bin/$(BIN_NAME)-{1}th-{2}tr $(BIN_NAME).cpp -lm -fopenmp -DNUMT={1} -DNUMTRIALS={2} -DCSV -DQUIET \
 	  ::: $(THREADS) ::: $(TRIALS)
 
@@ -23,19 +25,10 @@ bench results.csv: $(BIN_NAME).cpp
 
 pivot.csv: results.csv
 	mlr --icsv --ocsv cut -f trials,performance,threads \
-		then sort -n trials then reshape -s threads,performance \
-		results.csv > pivot.csv
+		then sort -n threads,trials results.csv > pivot.csv
 
-null  :=
-space := $(null) #
-comma := ,
-
-# do funky sed magic to update the thread/trial count in the doc w the vars here
-report: report.md results.csv # pivot.csv
-	cat report.md | \
-	sed 's/THREADREPLACE/$(subst $(space),$(comma),$(strip $(THREADS)))/' | \
-	sed 's/TRIALREPLACE/$(subst $(space),$(comma),$(strip $(TRIALS)))/' | \
-	pandoc -s - -o report.pdf -V geometry:margin=1in --highlight=tango -F pandoc-include -F pandoc-run-filter
+report: report.md results.csv pivot.csv
+	pandoc -s report.md -o report.pdf -V geometry:margin=1in --highlight=tango -F pandoc-include -F pandoc-run-filter
 
 .PHONY: clean
 clean:
