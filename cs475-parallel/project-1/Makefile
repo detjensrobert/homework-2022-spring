@@ -23,11 +23,10 @@ bench results.csv: $(BIN_NAME).cpp
 	# hyperfine -N --export-csv results.hyp.csv bin/*
 	for f in bin/*; do ./$$f >> results.csv; done
 
-pivot.csv: results.csv
-	mlr --icsv --ocsv cut -f trials,performance,threads \
-		then sort -n threads,trials results.csv > pivot.csv
+	# sort the data so the graphs work
+	mlr -I --csv sort -n threads,trials results.csv
 
-report: report.md results.csv pivot.csv
+report: report.md results.csv
 	pandoc -s report.md -o report.pdf -V geometry:margin=1in --highlight=tango -F pandoc-include -F pandoc-run-filter
 
 .PHONY: clean

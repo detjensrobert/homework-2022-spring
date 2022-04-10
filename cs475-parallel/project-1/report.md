@@ -34,9 +34,7 @@ print(f"{mperf} MT/s, with {ml['threads']} threads and {ml['trials']} trials")
 ## Graphs
 
 \newcommand{\threads}{1,2,4,8,12,16,20,24,32}
-<!-- \newcommand{\threads}{1,2,4,8} -->
 \newcommand{\trials}{1,10,100,1000,10000,100000,1000000}
-<!-- \newcommand{\trials}{100} -->
 
 \pgfplotsset{
   axis lines = left,
@@ -67,7 +65,7 @@ print(f"{mperf} MT/s, with {ml['threads']} threads and {ml['trials']} trials")
       ylabel = {Performance (MT/s)},
     ]
       \foreach \N in \threads {
-        \addplot table[col sep=comma,x=trials,y=performance,group by={0}{\N}] {results.csv};
+        \addplot table[col sep=comma,x=trials,y=performance,group by={0}{\N}]{results.csv};
         \addlegendentryexpanded{\N \ threads}
       }
     \end{semilogxaxis}
@@ -84,7 +82,7 @@ print(f"{mperf} MT/s, with {ml['threads']} threads and {ml['trials']} trials")
       xtick  = \threads
     ]
       \foreach \N in \trials {
-        \addplot table[col sep=comma,x=threads,y=performance,col sep=comma,group by={1}{\N}] {pivot.csv};
+        \addplot table[col sep=comma,x=threads,y=performance,col sep=comma,group by={1}{\N}]{results.csv};
         \addlegendentryexpanded{\N \ trials}
       }
     \end{axis}
@@ -99,3 +97,8 @@ Choosing one of the runs (the one with the maximum number of trials would be goo
 ## Parallel fraction
 
 Compute Fp, the Parallel Fraction, for this computation.
+
+\begin{align*}
+  PF &= \frac{n}{n-1}(1 - \frac{1}{Speedup}) \\
+  &= \frac{24}{23}(1 - \frac{1}{Speedup}) \\
+\end{align*}
