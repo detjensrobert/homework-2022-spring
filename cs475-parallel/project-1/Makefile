@@ -9,19 +9,19 @@ $(BIN_NAME): $(BIN_NAME).cpp
 $(BIN_NAME)-%t: $(BIN_NAME).cpp
 	g++ -o $@ $(BIN_NAME).cpp -lm -fopenmp -DNUMT=$* -DQUIET
 
-bench results.csv: $(BIN_NAME).cpp
+bin/$(BIN_NAME)-1th-1tr: $(BIN_NAME).cpp
 	[ -d bin ] || mkdir bin
-
-	# remove previous resuts
-	echo 'threads,trials,probability,performance' > results.csv
-
 
 	parallel g++ -o bin/$(BIN_NAME)-{1}th-{2}tr $(BIN_NAME).cpp -lm -fopenmp -DNUMT={1} -DNUMTRIALS={2} -DCSV -DQUIET \
 	  ::: $(THREADS) ::: $(TRIALS)
 
+bench results.csv: bin/$(BIN_NAME)-1th-1tr
+	# remove previous resuts
+	echo 'threads,trials,probability,performance' > results.csv
+
 	# run one trial at a time
 	# hyperfine -N --export-csv results.hyp.csv bin/*
-	for f in bin/*; do ./$$f >> results.csv; done
+	for f in bin/*; do ./$$f >> results.csv; echo -n .; sleep 0.1; done; echo
 
 	# sort the data so the graphs work
 	mlr -I --csv sort -n threads,trials results.csv

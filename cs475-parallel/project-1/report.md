@@ -1,8 +1,6 @@
 ---
 header-includes:
   - \usepackage{pgfplots}
-  - \usepackage{pgfplotstable}
-  - \usepackage{xstring}
 ---
 
 # CS 475 Project 1: Monte Carlo Simulation
@@ -93,6 +91,22 @@ print(f"{mperf} MT/s, with {ml['threads']} threads and {ml['trials']} trials")
 ## Likely probability
 
 Choosing one of the runs (the one with the maximum number of trials would be good), tell me what you think the actual probability is.
+
+```{.run cmd="python" in="script" out="text"}
+import csv
+
+with open('results.csv', 'r') as csvfile:
+  reader = csv.DictReader(csvfile)
+  mperf = 0
+  ml = {}
+  for row in reader:
+    # print(row)
+    if (float(row['performance']) > mperf):
+      mperf = float(row['performance'])
+      ml = row
+
+print(f"")
+```
 
 ## Parallel fraction
 
