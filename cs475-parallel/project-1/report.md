@@ -1,38 +1,17 @@
 ---
 header-includes:
   - \usepackage{pgfplots}
+
+title: 'CS 475 Project 1: Monte Carlo Simulation'
+author:
+  - Robert Detjens
+  - detjensr@oregonstate.edu
 ---
-
-# CS 475 Project 1: Monte Carlo Simulation
-
-## Robert Detjens
-
----
-
-## Peak performance
-
-The highest performance from these trials is:
-
-```{.run cmd="python" in="script" out="text"}
-import csv
-
-with open('results.csv', 'r') as csvfile:
-  reader = csv.DictReader(csvfile)
-  mperf = 0
-  ml = {}
-  for row in reader:
-    # print(row)
-    if (float(row['performance']) > mperf):
-      mperf = float(row['performance'])
-      ml = row
-
-print(f"{mperf} MT/s, with {ml['threads']} threads and {ml['trials']} trials")
-```
 
 ## Graphs
 
-\newcommand{\threads}{1,2,4,8,12,16,20,24,32}
-\newcommand{\trials}{1,10,100,1000,10000,100000,1000000}
+\newcommand{\threads}{{1,2,4,8,12,16,20,24,32}}
+\newcommand{\trials}{{1,10,100,1000,10000,100000,1000000}}
 
 \pgfplotsset{
   axis lines = left,
@@ -40,6 +19,7 @@ print(f"{mperf} MT/s, with {ml['threads']} threads and {ml['trials']} trials")
   grid style = {dashed,gray!30},
   legend pos = outer north east,
   legend cell align = left,
+  cycle list name = color list,
 }
 
 \pgfplotsset{
@@ -88,31 +68,31 @@ print(f"{mperf} MT/s, with {ml['threads']} threads and {ml['trials']} trials")
   \caption{Threads vs Performance across different numbers of trials}
 \end{figure}
 
+## Peak performance
+
+The highest performance from these trials is 134.79 MT/s, with 8 threads and 10000 trials.
+
 ## Likely probability
 
-Choosing one of the runs (the one with the maximum number of trials would be good), tell me what you think the actual probability is.
-
-```{.run cmd="python" in="script" out="text"}
-import csv
-
-with open('results.csv', 'r') as csvfile:
-  reader = csv.DictReader(csvfile)
-  mperf = 0
-  ml = {}
-  for row in reader:
-    # print(row)
-    if (float(row['performance']) > mperf):
-      mperf = float(row['performance'])
-      ml = row
-
-print(f"")
-```
+The probability for hitting the truck looks to be 29%, as as the trial count increases, the probability trends towards 29%.
 
 ## Parallel fraction
 
-Compute Fp, the Parallel Fraction, for this computation.
+Speedup taken from the trial and thread count with the highest performance.
+
+1-thread vs. 8-thread peformance for 10000 trials:
 
 \begin{align*}
   PF &= \frac{n}{n-1}(1 - \frac{1}{Speedup}) \\
-  &= \frac{24}{23}(1 - \frac{1}{Speedup}) \\
+  &= \frac{8}{7}(1 - \frac{1}{134.79_{8t} / 24.96_{1t}}) \\
+  &= 0.93123 \\
+  &= 93.123 \%
 \end{align*}
+
+## Conclusion
+
+These tests were performed on an i7-1165G7, which has 8 hw threads. As expected, the performance of these tests peaks at 8 threads when the processor is fully saturated without being overcommitted.
+
+Performance increased for a given thread count as the number of trials increased, likely due to the longer runtime allowing better use of caches.
+
+Performance for a fixed number of trials peaked at 8 cores, as more cores would overcommit resources and require context switching between processes.

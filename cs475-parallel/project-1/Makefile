@@ -21,7 +21,7 @@ bench results.csv: bin/$(BIN_NAME)-1th-1tr
 
 	# run one trial at a time
 	# hyperfine -N --export-csv results.hyp.csv bin/*
-	for f in bin/*; do ./$$f >> results.csv; echo -n .; sleep 0.1; done; echo
+	for f in bin/*; do ./$$f >> results.csv; echo -n .; done; echo
 
 	# sort the data so the graphs work
 	mlr -I --csv sort -n threads,trials results.csv
@@ -31,4 +31,4 @@ report: report.md results.csv
 
 .PHONY: clean
 clean:
-	rm -rf $(shell cat .gitignore)
+	git clean -dfX
