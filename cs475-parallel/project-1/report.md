@@ -95,4 +95,4 @@ These tests were performed on an i7-1165G7, which has 8 hw threads. As expected,
 
 Performance increased for a given thread count as the number of trials increased, likely due to the longer runtime allowing better use of caches.
 
-Performance for a fixed number of trials peaked at 8 cores, as more cores would overcommit resources and require context switching between processes.
+Performance for a fixed number of trials peaked at 8 cores, as more cores would overcommit resources and require context switching between processes. Overall, performance increased for larger numbers of trials, as the longer runtime offsets the overhead of setting up the threads, cpu branch prediction training, etc.
