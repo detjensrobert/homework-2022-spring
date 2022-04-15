@@ -11,3 +11,6 @@ __pandoc_run__
 *.html
 
 .gdb_history
+
+# parallel submission archives
+*.zip
