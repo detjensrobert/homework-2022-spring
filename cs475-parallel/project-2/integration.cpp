@@ -17,7 +17,7 @@
 
 // default number of nodes
 #ifndef NUMNODES
-#define NUMNODES 1
+#define NUMNODES 1000
 #endif
 
 #define XMIN -1.
@@ -35,8 +35,8 @@ int main(int argc, char *argv[]) {
   // the area of a single full-sized tile:
   // (not all tiles are full-sized, though)
 
-  float tile_area = ((XMAX - XMIN) / (float)(NUMNODES - 1)) *
-                    ((YMAX - YMIN) / (float)(NUMNODES - 1));
+  const float tile_area = ((XMAX - XMIN) / (float)(NUMNODES - 1)) *
+                          ((YMAX - YMIN) / (float)(NUMNODES - 1));
 
   double time_start = omp_get_wtime();
 
@@ -50,7 +50,8 @@ int main(int argc, char *argv[]) {
   for (int iv = 0; iv < NUMNODES; iv++) {
     for (int iu = 0; iu < NUMNODES; iu++) {
 
-      float tile_volume = Height(iu, iv) * tile_area;
+      // double tile_volume = 2 * Height(iu, iv) * tile_area;
+      double tile_volume = 2 * Height(iu, iv) * tile_area;
 
       // adjust volume for edges / corners where half/quarter are cut off
       if (iv == 0 || iv == NUMNODES - 1) {
@@ -69,11 +70,11 @@ int main(int argc, char *argv[]) {
       (double)NUMNODES / (time_end - time_start) / 1000000.;
 
 #ifndef QUIET
-  fprintf(stderr, "%2d threads : %8d nodes ; megatrials/sec = %6.2lf\n", NUMT,
-          NUMNODES, megaTrialsPerSecond);
+  fprintf(stderr, "%2d threads : %8d nodes ; volume = %lf ; megatrials/sec = %6lf\n", NUMT,
+          NUMNODES, total_volume, megaTrialsPerSecond);
 #endif
 #ifdef CSV
-  printf("%2d,%8d,%6.2lf\n", NUMT, NUMNODES, megaTrialsPerSecond);
+  printf("%d,%d,%lf\n", NUMT, NUMNODES, megaTrialsPerSecond);
 #endif
 }
 

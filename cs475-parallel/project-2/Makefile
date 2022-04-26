@@ -1,21 +1,21 @@
 BIN_NAME = integration
 
 THREADS = 1 2 4 8 12 16 20 24 32
-NODES = 1 10 100 1000 10000 100000 1000000
+NODES = 1000 2000 4000 8000 16000
 
 $(BIN_NAME): $(BIN_NAME).cpp
-	g++ -o $(BIN_NAME) $(BIN_NAME).cpp -lm -fopenmp
+	g++ -O3 -o $(BIN_NAME) $(BIN_NAME).cpp -lm -fopenmp
 
 $(BIN_NAME)-%t: $(BIN_NAME).cpp
-	g++ -o $@ $(BIN_NAME).cpp -lm -fopenmp -DNUMT=$* -DQUIET
+	g++ -O3 -o $@ $(BIN_NAME).cpp -lm -fopenmp -DNUMT=$*
 
-bin/$(BIN_NAME)-1th-1tr: $(BIN_NAME).cpp
+bin: $(BIN_NAME).cpp
 	[ -d bin ] || mkdir bin
 
-	parallel g++ -o bin/$(BIN_NAME)-{1}th-{2}n $(BIN_NAME).cpp -lm -fopenmp -DNUMT={1} -DNUMNODES={2} -DCSV -DQUIET \
+	parallel g++ -O3 -o bin/$(BIN_NAME)-{1}th-{2}n $(BIN_NAME).cpp -lm -fopenmp -DNUMT={1} -DNUMNODES={2} -DCSV -DQUIET \
 	  ::: $(THREADS) ::: $(NODES)
 
-bench results.csv: bin/$(BIN_NAME)-1th-1tr
+bench results.csv: bin
 	# remove previous resuts
 	echo 'threads,nodes,performance' > results.csv
 
