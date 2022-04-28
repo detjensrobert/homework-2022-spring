@@ -66,15 +66,16 @@ int main(int argc, char *argv[]) {
   }
 
   double time_end = omp_get_wtime();
-  double megaTrialsPerSecond =
+  double meganodes_per_second =
       (double)NUMNODES / (time_end - time_start) / 1000000.;
 
 #ifndef QUIET
-  fprintf(stderr, "%2d threads : %8d nodes ; volume = %lf ; megatrials/sec = %6lf\n", NUMT,
-          NUMNODES, total_volume, megaTrialsPerSecond);
+  fprintf(stderr,
+          "%2d threads : %8d nodes ; volume = %lf ; megatrials/sec = %6lf\n",
+          NUMT, NUMNODES, total_volume, meganodes_per_second);
 #endif
 #ifdef CSV
-  printf("%d,%d,%lf\n", NUMT, NUMNODES, megaTrialsPerSecond);
+  printf("%d,%d,%lf,%lf\n", NUMT, NUMNODES, total_volume, meganodes_per_second);
 #endif
 }
 

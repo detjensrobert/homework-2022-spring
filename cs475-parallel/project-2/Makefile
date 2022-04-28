@@ -17,7 +17,7 @@ bin: $(BIN_NAME).cpp
 
 bench results.csv: bin
 	# remove previous resuts
-	echo 'threads,nodes,performance' > results.csv
+	echo 'threads,nodes,volume,performance' > results.csv
 
 	# run one trial at a time
 	# hyperfine -N --export-csv results.hyp.csv bin/*

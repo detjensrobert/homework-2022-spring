@@ -61,10 +61,10 @@ This benchmark was done on a 12-core AMD Ryzen 2600 running Arch Linux.
   \begin{tikzpicture}
     \begin{axis}[
       xlabel = {No. of Integration Slices},
-      ylabel = {Performance (MT/s)},
-      xtick  = \nodes
+      ylabel = {Performance (MN/s)},
+      xtick  = {\nodes}
     ]
-      \foreach \N in \threads {
+      \foreach \N in {\threads} {
         \addplot table[col sep=comma,x=nodes,y=performance,group by={0}{\N}]{results.csv};
         \addlegendentryexpanded{\N \ threads}
       }
@@ -78,10 +78,10 @@ This benchmark was done on a 12-core AMD Ryzen 2600 running Arch Linux.
   \begin{tikzpicture}
     \begin{axis}[
       xlabel = {Threads used},
-      ylabel = {Performance (MT/s)},
-      xtick  = \threads
+      ylabel = {Performance (MN/s)},
+      xtick  = {\threads}
     ]
-      \foreach \N in \nodes {
+      \foreach \N in {\nodes} {
         \addplot table[col sep=comma,x=threads,y=performance,col sep=comma,group by={1}{\N}]{results.csv};
         \addlegendentryexpanded{\N \ nodes}
       }
