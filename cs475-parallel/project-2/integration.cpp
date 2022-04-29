@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 
   double time_end = omp_get_wtime();
   double meganodes_per_second =
-      (double)NUMNODES / (time_end - time_start) / 1000000.;
+      (double)(NUMNODES /* * NUMNODES */) / (time_end - time_start) / 1000000.;
 
 #ifndef QUIET
   fprintf(stderr,

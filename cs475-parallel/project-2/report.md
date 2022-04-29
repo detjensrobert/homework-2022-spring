@@ -12,27 +12,14 @@ author:
 
 This benchmark was done on a 12-core AMD Ryzen 2600 running Arch Linux.
 
+## Volume
 
-- Tell what machine you ran this on
-
-- What do you think the actual volume is?
-
-- Show the performances you achieved in tables and two graphs showing:
-  - Performance as a function of NUMNODES with colored lines showing different NUMT values
-  - Performance as a function of NUMT with colored lines showing different NUMNODES values
-
-- What patterns are you seeing in the speeds?
-
-- Why do you think it is behaving this way?
-
-- What is the Parallel Fraction for this application, using the Inverse Amdahl equation?
-
-- Given that Parallel Fraction, what is the maximum speed-up you could ever get?
+As the number of nodes increases, the volume approaches 7.757854.
 
 ## Graphs
 
 \newcommand{\threads}{1,2,4,8,12,16,20,24,32}
-\newcommand{\nodes}{1000,2000,4000,8000,16000}
+\newcommand{\nodes}{5,10,50,100,500,1000,2000,4000,8000,16000}
 
 \pgfplotsset{
   axis lines = left,
@@ -56,29 +43,29 @@ This benchmark was done on a 12-core AMD Ryzen 2600 running Arch Linux.
   }
 }
 
-\begin{figure}[h]
+\begin{figure}[h!]
   \centering
   \begin{tikzpicture}
-    \begin{axis}[
+    \begin{semilogxaxis}[
       xlabel = {No. of Integration Slices},
-      ylabel = {Performance (MN/s)},
+      ylabel = {Performance (MNode/s)},
       xtick  = {\nodes}
     ]
       \foreach \N in {\threads} {
         \addplot table[col sep=comma,x=nodes,y=performance,group by={0}{\N}]{results.csv};
         \addlegendentryexpanded{\N \ threads}
       }
-    \end{axis}
+    \end{semilogxaxis}
   \end{tikzpicture}
   \caption{Slices vs Performance across different numbers of threads}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[h!]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
       xlabel = {Threads used},
-      ylabel = {Performance (MN/s)},
+      ylabel = {Performance (MNode/s)},
       xtick  = {\threads}
     ]
       \foreach \N in {\nodes} {
@@ -89,3 +76,13 @@ This benchmark was done on a 12-core AMD Ryzen 2600 running Arch Linux.
   \end{tikzpicture}
   \caption{Threads vs Performance across different numbers of slices}
 \end{figure}
+
+Performance peaks at
+
+- What patterns are you seeing in the speeds?
+
+- Why do you think it is behaving this way?
+
+- What is the Parallel Fraction for this application, using the Inverse Amdahl equation?
+
+- Given that Parallel Fraction, what is the maximum speed-up you could ever get?
