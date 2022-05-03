@@ -18,6 +18,7 @@ As the number of nodes increases, the volume approaches 7.757854.
 
 ## Graphs
 
+
 \newcommand{\threads}{1,2,4,8,12,16,20,24,32}
 \newcommand{\nodes}{5,10,50,100,500,1000,2000,4000,8000,16000}
 
@@ -76,6 +77,12 @@ As the number of nodes increases, the volume approaches 7.757854.
   \end{tikzpicture}
   \caption{Threads vs Performance across different numbers of slices}
 \end{figure}
+
+
+
+![Slices vs. performance across different thread counts](slices-vs-perf.png){ width=60% }
+
+![Threads vs. performance across different numbers of slices](threads-vs-perf.png){ width=60% }
 
 Performance peaks at
 
