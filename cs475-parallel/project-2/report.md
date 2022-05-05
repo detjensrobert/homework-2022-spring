@@ -10,7 +10,7 @@ author:
 
 ## Runtime information
 
-This benchmark was done on a 12-core AMD Ryzen 2600 running Arch Linux.
+This benchmark was done on an 8-core Intel i7-1165G7 running Fedora Linux.
 
 ## Volume
 
@@ -20,7 +20,8 @@ As the number of nodes increases, the volume approaches 7.757854.
 
 
 \newcommand{\threads}{1,2,4,8,12,16,20,24,32}
-\newcommand{\nodes}{5,10,50,100,500,1000,2000,4000,8000,16000}
+\newcommand{\nodes}{50,100,500,1000,2000,4000,8000}
+<!-- \newcommand{\nodes}{1000,2000,4000,8000,16000} -->
 
 \pgfplotsset{
   axis lines = left,
@@ -31,46 +32,34 @@ As the number of nodes increases, the volume approaches 7.757854.
   cycle list name = color list,
 }
 
-\pgfplotsset{
-  group by/.style 2 args={
-    x filter/.code={
-      \edef\tempa{\thisrowno{#1}}
-      \edef\tempb{#2}
-      \ifx\tempa\tempb
-      \else
-        \def\pgfmathresult{inf}
-      \fi
-    }
-  }
-}
-
-\begin{figure}[h!]
+\begin{figure}[h]
   \centering
   \begin{tikzpicture}
     \begin{semilogxaxis}[
       xlabel = {No. of Integration Slices},
       ylabel = {Performance (MNode/s)},
-      xtick  = {\nodes}
+      xtick  = {\nodes},
+      scaled ticks = false,
     ]
       \foreach \N in {\threads} {
-        \addplot table[col sep=comma,x=nodes,y=performance,group by={0}{\N}]{results.csv};
+        \addplot table[col sep=comma,x=nodes,y=\N]{results-nodes.csv};
         \addlegendentryexpanded{\N \ threads}
       }
     \end{semilogxaxis}
   \end{tikzpicture}
-  \caption{Slices vs Performance across different numbers of threads}
+  \caption{Integration Slices vs Performance across different numbers of threads}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[h]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
       xlabel = {Threads used},
       ylabel = {Performance (MNode/s)},
-      xtick  = {\threads}
+      xtick  = {\threads},
     ]
       \foreach \N in {\nodes} {
-        \addplot table[col sep=comma,x=threads,y=performance,col sep=comma,group by={1}{\N}]{results.csv};
+        \addplot table[col sep=comma,x=threads,y=\N]{results-threads.csv};
         \addlegendentryexpanded{\N \ nodes}
       }
     \end{axis}
@@ -78,11 +67,13 @@ As the number of nodes increases, the volume approaches 7.757854.
   \caption{Threads vs Performance across different numbers of slices}
 \end{figure}
 
+## Pivoted graphs
 
 
-![Slices vs. performance across different thread counts](slices-vs-perf.png){ width=60% }
 
-![Threads vs. performance across different numbers of slices](threads-vs-perf.png){ width=60% }
+<!-- ![Slices vs. performance across different thread counts](slices-vs-perf.png){ width=60% } -->
+
+<!-- ![Threads vs. performance across different numbers of slices](threads-vs-perf.png){ width=60% } -->
 
 Performance peaks at
 
