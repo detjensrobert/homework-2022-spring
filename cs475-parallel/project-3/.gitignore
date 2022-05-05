@@ -1,0 +1,6 @@
+grain-sim
+grain-sim-*
+bin/
+out
+out.*
+*.csv
