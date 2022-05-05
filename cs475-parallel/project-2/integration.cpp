@@ -20,6 +20,11 @@
 #define NUMNODES 1000
 #endif
 
+// default number of attempts to average
+#ifndef TRIALS
+#define TRIALS 10
+#endif
+
 #define XMIN -1.
 #define XMAX 1.
 #define YMIN -1.
@@ -38,44 +43,59 @@ int main(int argc, char *argv[]) {
   const float tile_area = ((XMAX - XMIN) / (float)(NUMNODES - 1)) *
                           ((YMAX - YMIN) / (float)(NUMNODES - 1));
 
-  double time_start = omp_get_wtime();
+  double average_perf = 0.;
+  double average_vol = 0.;
 
-  // sum up the weighted heights into the variable "volume"
-  // using an OpenMP for-loop and a reduction:
+  for (int t = 0; t < TRIALS; t++) {
 
-  double total_volume = 0;
+    double time_start = omp_get_wtime();
+
+    // sum up the weighted heights into the variable "volume"
+    // using an OpenMP for-loop and a reduction:
+
+    double total_volume = 0;
 #pragma omp parallel for collapse(2) default(none) firstprivate(tile_area) reduction(+ : total_volume)
-  // The (2) means you are collapsing 2 nested for-loops into one
-  // The end effect is exactly like above, but without the mod / divide
-  for (int iv = 0; iv < NUMNODES; iv++) {
-    for (int iu = 0; iu < NUMNODES; iu++) {
+    // The (2) means you are collapsing 2 nested for-loops into one
+    // The end effect is exactly like above, but without the mod / divide
+    for (int iv = 0; iv < NUMNODES; iv++) {
+      for (int iu = 0; iu < NUMNODES; iu++) {
 
-      // double tile_volume = 2 * Height(iu, iv) * tile_area;
-      double tile_volume = 2 * Height(iu, iv) * tile_area;
+        // double tile_volume = 2 * Height(iu, iv) * tile_area;
+        double tile_volume = 2 * Height(iu, iv) * tile_area;
 
-      // adjust volume for edges / corners where half/quarter are cut off
-      if (iv == 0 || iv == NUMNODES - 1) {
-        tile_volume *= 0.5;
+        // adjust volume for edges / corners where half/quarter are cut off
+        if (iv == 0 || iv == NUMNODES - 1) {
+          tile_volume *= 0.5;
+        }
+        if (iu == 0 || iu == NUMNODES - 1) {
+          tile_volume *= 0.5;
+        }
+
+        total_volume += tile_volume;
       }
-      if (iu == 0 || iu == NUMNODES - 1) {
-        tile_volume *= 0.5;
-      }
-
-      total_volume += tile_volume;
     }
-  }
 
-  double time_end = omp_get_wtime();
-  double meganodes_per_second =
-      (double)(NUMNODES /* * NUMNODES */) / (time_end - time_start) / 1000000.;
+    double time_end = omp_get_wtime();
+    double meganodes_per_second = (double)(NUMNODES * NUMNODES) /
+                                  (time_end - time_start) / 1000000.;
+
+    if (DEBUG) {
+      fprintf(stderr, "vol: %lf, perf: %lf\n", total_volume,
+              meganodes_per_second);
+    }
+
+    // add to running averages
+    average_perf = (average_perf * (t) + meganodes_per_second) / (t + 1);
+    average_vol = (average_vol * (t) + total_volume) / (t + 1);
+  }
 
 #ifndef QUIET
   fprintf(stderr,
           "%2d threads : %8d nodes ; volume = %lf ; megatrials/sec = %6lf\n",
-          NUMT, NUMNODES, total_volume, meganodes_per_second);
+          NUMT, NUMNODES, average_vol, average_perf);
 #endif
 #ifdef CSV
-  printf("%d,%d,%lf,%lf\n", NUMT, NUMNODES, total_volume, meganodes_per_second);
+  printf("%d,%d,%lf,%lf\n", NUMT, NUMNODES, average_vol, average_perf);
 #endif
 }
 
