@@ -1,16 +1,34 @@
-BIN_NAME = simd-test
+CC = g++ -g -lm -fopenmp -O0
 
 THREADS = 1 2 4 8 12 16 20 24 32
-NODES = 5 10 50 100 500 1000 2000 4000 8000 16000
+ARRAYSIZE = $(shell ruby -e 'puts (10..24).map {|p| 2**p }')
 
-$(BIN_NAME): $(BIN_NAME).cpp
-	g++ -g -o $(BIN_NAME) $(BIN_NAME).cpp -lm -fopenmp
+simd-test: simd-test.cpp
+	$(CC) -o simd-test simd-test.cpp
 
-$(BIN_NAME)-csv: $(BIN_NAME).cpp
-	g++ -g -o $(BIN_NAME)-csv $(BIN_NAME).cpp -lm -fopenmp -DCSV
+simd-test-csv: simd-test.cpp
+	$(CC) -o simd-test-csv simd-test.cpp -DCSV
 
-bench results.csv: $(BIN_NAME)-csv
-	./$(BIN_NAME)-csv > results.csv
+simd-test-a%: simd-test.cpp
+	$(CC) -o $@ simd-test.cpp -DARRAYSIZE=$* -DCSV
+
+# if not on a centos system, this needs to run in a centos container
+docker: Dockerfile simd-test.cpp
+	docker build -q --tag project-4 .
+	docker run --rm -it project-4 sh -c 'make simd-test && ./simd-test'
+
+docker-bench results.csv: Dockerfile simd-test.cpp
+	docker build -q --tag project-4 .
+	echo 'array-size,mult-nosimd,mult-simd,mult-speedup,reduce-nosimd,reduce-simd,reduce-speedup' > results.csv
+	for as in $(ARRAYSIZE); do \
+		docker run --rm -it project-4 sh -c "make --silent simd-test-a$$as && ./simd-test-a$$as" >> results.csv; \
+	done
+
+bench: simd-test.cpp
+	echo 'array-size,mult-nosimd,mult-simd,mult-speedup,reduce-nosimd,reduce-simd,reduce-speedup' > results.csv
+	for as in $(ARRAYSIZE); do \
+		make --silent simd-test-a$$as && ./simd-test-a$$as >> results.csv; \
+	done
 
 report: report.md results.csv
 	pandoc -s report.md -o report.pdf -V geometry:margin=1in --highlight=tango -F pantable
