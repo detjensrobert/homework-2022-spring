@@ -22,7 +22,9 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
 ```
 
 \newcommand{\threads}{1,2,4,8,12,16,20,24,32}
-\newcommand{\sizes}{1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216}
+\newcommand{\sizes}{1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216,33554432,67108864,134217728,268435456}
+
+<!-- \newcommand{\sizes}{1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216} -->
 
 \pgfplotsset{
   axis lines = left,
@@ -31,6 +33,11 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
   legend pos = outer north east,
   legend cell align = left,
   %cycle list name = color list,
+  %cycle list name = exotic,
+
+  ymin = 0,
+  xtick/.expand once = {\sizes},
+  %xticklabels = {1KB,,,8KB,,,64KB,,,,1MB,,,,16MB}
 }
 
 \begin{figure}[h]
@@ -40,9 +47,6 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
       xmode = log,
       xlabel = {Array Sizes (bytes)},
       ylabel = {Performance (MMults/s)},
-      ymin = 0,
-      xtick/.expand once = {\sizes},
-      xticklabels = {1KB,,,8KB,,,64KB,,,,1MB,,,,16MB}
     ]
 
       %\addplot table[col sep=comma,x=array-size,y=mult-nosimd]{results.csv};
@@ -66,11 +70,11 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
       xmode = log,
       xlabel = {Array Sizes (bytes)},
       ylabel = {Speedup},
-      ymin = 5, ymax = 7,
-      xtick/.expand once = {\sizes},
-      xticklabels = {1KB,,,8KB,,,64KB,,,,1MB,,,,16MB}
     ]
+      \addplot table[col sep=comma,x=array-size,y=mult-speedup]{results.csv};
+      \addlegendentry{Speedup (Multiply)}
       \addplot table[col sep=comma,x=array-size,y=reduce-speedup]{results.csv};
+      \addlegendentry{Speedup (Reduce)}
     \end{axis}
   \end{tikzpicture}
   \caption{Array Size vs. SIMD Speedup Factor for multiply-reduce}
