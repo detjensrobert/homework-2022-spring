@@ -2,6 +2,7 @@
 header-includes:
   - \usepackage{pgfplots}
   - \usepackage{pgfplotstable}
+  - \pgfplotsset{compat=1.18}
 
 title: 'CS 475 Project 4: SIMD Parallelization via SSE'
 author:
@@ -19,12 +20,8 @@ This benchmark was done on an 6-core/12-hw-thread AMD 2600 running CentOS 7 (con
 ---
 include: results.csv
 caption: SIMD vs. non-SIMD multiply and reduce, raw data
+---
 ```
-
-\newcommand{\threads}{1,2,4,8,12,16,20,24,32}
-\newcommand{\sizes}{1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216,33554432,67108864,134217728,268435456}
-
-<!-- \newcommand{\sizes}{1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216} -->
 
 \pgfplotsset{
   axis lines = left,
@@ -32,12 +29,10 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
   grid style = {dashed,gray!30},
   legend pos = outer north east,
   legend cell align = left,
-  %cycle list name = color list,
-  %cycle list name = exotic,
-
+  ,
   ymin = 0,
-  xtick/.expand once = {\sizes},
-  %xticklabels = {1KB,,,8KB,,,64KB,,,,1MB,,,,16MB}
+  xtick       = {1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216},
+  xticklabels = {1KB ,    ,    ,    ,16KB ,     ,     ,128KB ,      ,      ,1MB    ,       ,       ,       ,16MB    },
 }
 
 \begin{figure}[h]
@@ -48,19 +43,13 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
       xlabel = {Array Sizes (bytes)},
       ylabel = {Performance (MMults/s)},
     ]
-
-      %\addplot table[col sep=comma,x=array-size,y=mult-nosimd]{results.csv};
-      %\addlegendentry{Multiply (regular)}
-      %\addplot table[col sep=comma,x=array-size,y=mult-simd]{results.csv};
-      %\addlegendentry{Multiply (SIMD)}
-
-      \addplot table[col sep=comma,x=array-size,y=reduce-nosimd]{results.csv};
-      \addlegendentry{Reduce (regular)}
-      \addplot table[col sep=comma,x=array-size,y=reduce-simd]{results.csv};
-      \addlegendentry{Reduce (SIMD)}
+      \addplot table[col sep=comma,x=array-size,y=mult-nosimd]{results.csv};
+      \addlegendentry{Multiply (regular)}
+      \addplot table[col sep=comma,x=array-size,y=mult-simd]{results.csv};
+      \addlegendentry{Multiply (SIMD)}
     \end{axis}
   \end{tikzpicture}
-  \caption{Array Size vs. Performance for SIMD and non-SIMD multiply-reduce}
+  \caption{Array Size vs. Performance for SIMD and non-SIMD multiply}
 \end{figure}
 
 \begin{figure}[h]
@@ -74,7 +63,7 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
       \addplot table[col sep=comma,x=array-size,y=mult-speedup]{results.csv};
       \addlegendentry{Speedup (Multiply)}
       \addplot table[col sep=comma,x=array-size,y=reduce-speedup]{results.csv};
-      \addlegendentry{Speedup (Reduce)}
+      \addlegendentry{Speedup (Mult+Reduce)}
     \end{axis}
   \end{tikzpicture}
   \caption{Array Size vs. SIMD Speedup Factor for multiply-reduce}

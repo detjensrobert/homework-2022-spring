@@ -1,7 +1,7 @@
 CC = g++ -g -lm -fopenmp -O0
 
 THREADS = 1 2 4 8 12 16 20 24 32
-ARRAYSIZE = $(shell ruby -e 'puts (10..28).map {|p| 2**p }')
+ARRAYSIZE = $(shell ruby -e 'puts (10..24).map {|p| 2**p }')
 
 simd-test: simd-test.cpp
 	$(CC) -o simd-test simd-test.cpp

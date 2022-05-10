@@ -1,6 +1,6 @@
-FROM centos:7
+FROM dokken/centos-8
 
-RUN yum -y install make gcc-c++ libgomp
+RUN dnf -y install make gcc-c++ libgomp
 
 WORKDIR /data
 COPY Makefile simd-test.cpp /data/
