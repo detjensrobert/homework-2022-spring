@@ -47,6 +47,11 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
       \addlegendentry{Multiply (regular)}
       \addplot table[col sep=comma,x=array-size,y=mult-simd]{results.csv};
       \addlegendentry{Multiply (SIMD)}
+
+      \addplot table[col sep=comma,x=array-size,y=mult-nosimd]{results-flip.csv};
+      \addlegendentry{Multiply (regular) on \texttt{flip}}
+      \addplot table[col sep=comma,x=array-size,y=mult-simd]{results-flip.csv};
+      \addlegendentry{Multiply (SIMD) on \texttt{flip}}
     \end{axis}
   \end{tikzpicture}
   \caption{Array Size vs. Performance for SIMD and non-SIMD multiply}

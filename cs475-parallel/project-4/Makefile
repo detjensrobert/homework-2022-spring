@@ -24,13 +24,17 @@ docker-bench results.csv: Dockerfile simd-test.cpp
 		docker run --rm -it project-4 sh -c "make --silent simd-test-a$$as && ./simd-test-a$$as" >> results.csv; \
 	done
 
+flip-bench results-flip.csv: simd-test.cpp
+	ssh flip 'cd ~/repos/homework-2022-spring/cs475-parallel/project-4 && git pull -q && make bench'
+	scp flip:repos/homework-2022-spring/cs475-parallel/project-4/results.csv results-flip.csv
+
 bench: simd-test.cpp
 	echo 'array-size,mult-nosimd,mult-simd,mult-speedup,reduce-nosimd,reduce-simd,reduce-speedup' > results.csv
 	for as in $(ARRAYSIZE); do \
 		make --silent simd-test-a$$as && ./simd-test-a$$as >> results.csv; \
 	done
 
-report: report.md results.csv
+report: report.md results.csv results-flip.csv
 	pandoc -s report.md -o report.pdf -V geometry:margin=1in --highlight=tango -F pantable
 
 .PHONY: clean

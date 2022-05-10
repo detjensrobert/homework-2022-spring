@@ -12,7 +12,11 @@
 #define SSE_WIDTH 4
 #define ALIGNED __attribute__((aligned(16)))
 
+// attempts to find the max perf
 #define NUMTRIES 100
+
+// number of times to run the whole thing to average it
+#define NUMTRIALS 10
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE 1024 * 1024
@@ -35,14 +39,64 @@ void logprint(const char *l, int v) { printf("%s: %d\t", l, v); }
 void logprint(const char *l, double v) { printf("%s: %.2lf\t", l, v); }
 #endif
 
-int main(int argc, char *argv[]) {
+struct bench_result {
+  int arraysize;
+  double nosimd_mult_perf;
+  double simd_mult_perf;
+  double nosimd_mulsum_perf;
+  double simd_mulsum_perf;
+};
+
+struct bench_result *bench();
+
+int main(int argc, char **argv) {
+  struct bench_result totals = {
+      ARRAYSIZE,
+  };
+
+  for (int i = 0; i < NUMTRIALS; i++) {
+    struct bench_result *r = bench();
+
+    totals.nosimd_mult_perf += r->nosimd_mult_perf;
+    totals.simd_mult_perf += r->simd_mult_perf;
+    totals.nosimd_mulsum_perf += r->nosimd_mulsum_perf;
+    totals.simd_mulsum_perf += r->simd_mulsum_perf;
+
+    delete r;
+  }
+
+  // turn totals into averages
+  totals.nosimd_mult_perf /= NUMTRIALS;
+  totals.simd_mult_perf /= NUMTRIALS;
+  totals.nosimd_mulsum_perf /= NUMTRIALS;
+  totals.simd_mulsum_perf /= NUMTRIALS;
+
+// now print the calculated averages
+#ifdef CSV
+  printf("%d,%lf,%lf,%lf,%lf,%lf,%lf\n",
+#else
+  printf("arraysize %10d, trialcount %4d\n"
+         "  multiply:   nosimd: %10.2lf  simd: %10.2lf  speedup: %3.2lf\n"
+         "  multreduce: nosimd: %10.2lf  simd: %10.2lf, speedup: %3.2lf\n",
+         NUMTRIALS,
+#endif
+         totals.arraysize, totals.nosimd_mult_perf, totals.simd_mult_perf,
+         totals.simd_mult_perf / totals.nosimd_mult_perf,
+         totals.nosimd_mulsum_perf, totals.simd_mulsum_perf,
+         totals.simd_mulsum_perf / totals.nosimd_mulsum_perf);
+}
+
+struct bench_result *bench() {
+  struct bench_result *result = new struct bench_result;
+
   for (int i = 0; i < ARRAYSIZE; i++) {
     A[i] = sqrtf((float)(i + 1));
     B[i] = sqrtf((float)(i + 1));
   }
 
   // fprintf(stderr, "%12d\t", ARRAYSIZE);
-  logprint("arraysize", ARRAYSIZE);
+  // logprint("arraysize", ARRAYSIZE);
+  // result->arraysize = ARRAYSIZE;
 
   double maxPerformance = 0.;
   for (int t = 0; t < NUMTRIES; t++) {
@@ -55,7 +109,8 @@ int main(int argc, char *argv[]) {
   }
   double megaMults = maxPerformance / 1000000.;
   // fprintf(stderr, "N %10.2lf\t", megaMults);
-  logprint("mul nosimd", megaMults);
+  // logprint("mul nosimd", megaMults);
+  result->nosimd_mult_perf = megaMults;
   double mmn = megaMults;
 
   maxPerformance = 0.;
@@ -69,11 +124,12 @@ int main(int argc, char *argv[]) {
   }
   megaMults = maxPerformance / 1000000.;
   // fprintf(stderr, "S %10.2lf\t", megaMults);
-  logprint("with simd", megaMults);
+  // logprint("with simd", megaMults);
+  result->simd_mult_perf = megaMults;
   double mms = megaMults;
   double speedup = mms / mmn;
   // fprintf(stderr, "(%6.2lf)\t", speedup);
-  logprint("speedup", speedup);
+  // logprint("speedup", speedup);
 
   maxPerformance = 0.;
   float sumn, sums;
@@ -87,7 +143,8 @@ int main(int argc, char *argv[]) {
   }
   double megaMultAdds = maxPerformance / 1000000.;
   // fprintf(stderr, "N %10.2lf\t", megaMultAdds);
-  logprint("muladd nos", megaMultAdds);
+  // logprint("muladd nos", megaMultAdds);
+  result->nosimd_mulsum_perf = megaMultAdds;
   mmn = megaMultAdds;
 
   maxPerformance = 0.;
@@ -101,17 +158,18 @@ int main(int argc, char *argv[]) {
   }
   megaMultAdds = maxPerformance / 1000000.;
   // fprintf(stderr, "S %10.2lf\t", megaMultAdds);
-  logprint("with simd", megaMultAdds);
+  // logprint("with simd", megaMultAdds);
+  result->simd_mulsum_perf = megaMultAdds;
   mms = megaMultAdds;
   speedup = mms / mmn;
   // fprintf(stderr, "(%6.2lf)\n", speedup);
-  logprint("speedup", speedup);
+  // logprint("speedup", speedup);
   // fprintf( stderr, "[ %8.1f , %8.1f , %8.1f ]\n", C[ARRAYSIZE-1], sumn, sums
   // );
 
-  printf("\n");
+  // printf("\n");
 
-  return 0;
+  return result;
 }
 
 void nosimd_mult(float *a, float *b, float *c, int len) {
