@@ -15,9 +15,9 @@
 #define NUMT 2
 #endif
 
-// default number of nodes
-#ifndef NUMNODES
-#define NUMNODES 1000
+// default number of slices
+#ifndef NUMSLICES
+#define NUMSLICES 1000
 #endif
 
 // default number of attempts to average
@@ -40,8 +40,8 @@ int main(int argc, char *argv[]) {
   // the area of a single full-sized tile:
   // (not all tiles are full-sized, though)
 
-  const float tile_area = ((XMAX - XMIN) / (float)(NUMNODES - 1)) *
-                          ((YMAX - YMIN) / (float)(NUMNODES - 1));
+  const float tile_area = ((XMAX - XMIN) / (float)(NUMSLICES - 1)) *
+                          ((YMAX - YMIN) / (float)(NUMSLICES - 1));
 
   double average_perf = 0.;
   double average_vol = 0.;
@@ -57,17 +57,17 @@ int main(int argc, char *argv[]) {
 #pragma omp parallel for collapse(2) default(none) firstprivate(tile_area) reduction(+ : total_volume)
     // The (2) means you are collapsing 2 nested for-loops into one
     // The end effect is exactly like above, but without the mod / divide
-    for (int iv = 0; iv < NUMNODES; iv++) {
-      for (int iu = 0; iu < NUMNODES; iu++) {
+    for (int iv = 0; iv < NUMSLICES; iv++) {
+      for (int iu = 0; iu < NUMSLICES; iu++) {
 
         // double tile_volume = 2 * Height(iu, iv) * tile_area;
         double tile_volume = 2 * Height(iu, iv) * tile_area;
 
         // adjust volume for edges / corners where half/quarter are cut off
-        if (iv == 0 || iv == NUMNODES - 1) {
+        if (iv == 0 || iv == NUMSLICES - 1) {
           tile_volume *= 0.5;
         }
-        if (iu == 0 || iu == NUMNODES - 1) {
+        if (iu == 0 || iu == NUMSLICES - 1) {
           tile_volume *= 0.5;
         }
 
@@ -76,26 +76,26 @@ int main(int argc, char *argv[]) {
     }
 
     double time_end = omp_get_wtime();
-    double meganodes_per_second = (double)(NUMNODES * NUMNODES) /
+    double megaslices_per_second = (double)(NUMSLICES * NUMSLICES) /
                                   (time_end - time_start) / 1000000.;
 
     if (DEBUG) {
       fprintf(stderr, "vol: %lf, perf: %lf\n", total_volume,
-              meganodes_per_second);
+              megaslices_per_second);
     }
 
     // add to running averages
-    average_perf = (average_perf * (t) + meganodes_per_second) / (t + 1);
+    average_perf = (average_perf * (t) + megaslices_per_second) / (t + 1);
     average_vol = (average_vol * (t) + total_volume) / (t + 1);
   }
 
 #ifndef QUIET
   fprintf(stderr,
-          "%2d threads : %8d nodes ; volume = %lf ; megatrials/sec = %6lf\n",
-          NUMT, NUMNODES, average_vol, average_perf);
+          "%2d threads : %8d slices ; volume = %lf ; megatrials/sec = %6lf\n",
+          NUMT, NUMSLICES, average_vol, average_perf);
 #endif
 #ifdef CSV
-  printf("%d,%d,%lf,%lf\n", NUMT, NUMNODES, average_vol, average_perf);
+  printf("%d,%d,%lf,%lf\n", NUMT, NUMSLICES, average_vol, average_perf);
 #endif
 }
 
@@ -104,10 +104,10 @@ int main(int argc, char *argv[]) {
 const float N = 2.5f;
 const float R = 1.2f;
 
-float Height(int iu, int iv) { // iu,iv = 0 .. NUMNODES-1
+float Height(int iu, int iv) { // iu,iv = 0 .. NUMSLICES-1
 
-  float x = -1. + 2. * (float)iu / (float)(NUMNODES - 1); // -1. to +1.
-  float y = -1. + 2. * (float)iv / (float)(NUMNODES - 1); // -1. to +1.
+  float x = -1. + 2. * (float)iu / (float)(NUMSLICES - 1); // -1. to +1.
+  float y = -1. + 2. * (float)iv / (float)(NUMSLICES - 1); // -1. to +1.
 
   float xn = pow(fabs(x), (double)N);
   float yn = pow(fabs(y), (double)N);
