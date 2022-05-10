@@ -62,8 +62,10 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
     ]
       \addplot table[col sep=comma,x=array-size,y=mult-speedup]{results.csv};
       \addlegendentry{Speedup (Multiply)}
-      \addplot table[col sep=comma,x=array-size,y=reduce-speedup]{results.csv};
-      \addlegendentry{Speedup (Mult+Reduce)}
+      \addplot table[col sep=comma,x=array-size,y=mult-speedup]{results-flip.csv};
+      \addlegendentry{Speedup (Multiply) on \texttt{flip}}
+      %\addplot table[col sep=comma,x=array-size,y=reduce-speedup]{results.csv};
+      %\addlegendentry{Speedup (Mult+Reduce)}
     \end{axis}
   \end{tikzpicture}
   \caption{Array Size vs. SIMD Speedup Factor for multiply-reduce}
