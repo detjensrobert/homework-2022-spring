@@ -75,9 +75,9 @@ int main(int argc, char **argv) {
 #ifdef CSV
   printf("%d,%lf,%lf,%lf,%lf,%lf,%lf\n",
 #else
-  printf("arraysize %10d, trialcount %4d\n"
-         "  multiply:   nosimd: %10.2lf  simd: %10.2lf  speedup: %3.2lf\n"
-         "  multreduce: nosimd: %10.2lf  simd: %10.2lf, speedup: %3.2lf\n",
+  printf("arraysize %-10d trialcount %4d\n"
+         "  multiply:   nosimd: %-10.2lf  simd: %-10.2lf  speedup: %-3.2lf\n"
+         "  multreduce: nosimd: %-10.2lf  simd: %-10.2lf  speedup: %-3.2lf\n",
          NUMTRIALS,
 #endif
          totals.arraysize, totals.nosimd_mult_perf, totals.simd_mult_perf,
