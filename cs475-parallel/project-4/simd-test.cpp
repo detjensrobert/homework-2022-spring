@@ -16,7 +16,7 @@
 #define NUMTRIES 100
 
 // number of times to run the whole thing to average it
-#define NUMTRIALS 10
+#define NUMTRIALS 100
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE 1024 * 1024
