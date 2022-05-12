@@ -35,6 +35,28 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
   xticklabels = {1KB ,    ,    ,8K  ,     ,     ,64K  ,      ,      ,      ,1MB    ,       ,       ,8M     },
 }
 
+<!-- \begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      xmode = log,
+      xlabel = {Array Sizes (bytes)},
+      ylabel = {Performance (MMults/s)},
+    ]
+      \addplot table[col sep=comma,x=array-size,y=mult-nosimd]{results.csv};
+      \addlegendentry{Multiply (regular)}
+      \addplot table[col sep=comma,x=array-size,y=mult-simd]{results.csv};
+      \addlegendentry{Multiply (SIMD)}
+
+      \addplot table[col sep=comma,x=array-size,y=mult-nosimd]{results-flip.csv};
+      \addlegendentry{Multiply (regular) on \texttt{flip}}
+      \addplot table[col sep=comma,x=array-size,y=mult-simd]{results-flip.csv};
+      \addlegendentry{Multiply (SIMD) on \texttt{flip}}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Array Size vs. Performance for SIMD and non-SIMD multiply}
+\end{figure} -->
+
 \begin{figure}[h]
   \centering
   \begin{tikzpicture}
@@ -43,20 +65,28 @@ caption: SIMD vs. non-SIMD multiply and reduce, raw data
       xlabel = {Array Sizes (bytes)},
       ylabel = {Speedup},
     ]
-      \addplot table[col sep=comma,x=array-size,y=mult-speedup]{results.csv};
-      \addlegendentry{Speedup (Multiply)}
-      \addplot table[col sep=comma,x=array-size,y=mult-speedup]{results-flip.csv};
-      \addlegendentry{Speedup (Multiply) on \texttt{flip}}
+      %\addplot table[col sep=comma,x=array-size,y=mult-speedup]{results.csv};
+      %\addlegendentry{Speedup (Multiply)}
       %\addplot table[col sep=comma,x=array-size,y=reduce-speedup]{results.csv};
       %\addlegendentry{Speedup (Mult+Reduce)}
+      \addplot table[col sep=comma,x=array-size,y=mult-speedup]{results-flip.csv};
+      \addlegendentry{Speedup (Multiply) on \texttt{flip}}
+      %\addplot table[col sep=comma,x=array-size,y=reduce-speedup]{results-flip.csv};
+      %\addlegendentry{Speedup (Mult+Reduce) on \texttt{flip}}
     \end{axis}
   \end{tikzpicture}
   \caption{Array Size vs. SIMD Speedup Factor for multiply-reduce}
 \end{figure}
 
+## Analysis
 
-- Show the table of performances for each array size and the corresponding speedups
-- Show the graph of SIMD/non-SIMD speedup versus array size (one curve only)
-- What patterns are you seeing in the speedups?
-- Are they consistent across a variety of array sizes?
-- Why or why not, do you think?
+Performance of the SIMD graphs decreases in steps as the size of the array
+increases. This speedup decay parallels that of cache latency graphs, see below.
+
+![Example Cache Latency Chart (source [Anandtech](https://www.anandtech.com/show/9482/intel-broadwell-pt2-overclocking-ipc/3))](https://images.anandtech.com/doci/9482/5775C%20Memory%20Latency_575px.png){ width=60% }
+
+As the array size increases and no longer fits in the per-core 32KB L1 cache after
+16K elements, the performance drops as now the L2 cache is being used with
+higher latency. The L2 cache on `flip` is 256KB, so after that the performance takes a further hit once the arrays large enough to need to use the L3.
+
+The non-SIMD performance was fairly constant across all array sizes; the performance of doing the multiply-reduce is not limited by the memory latency/bandwidth.
