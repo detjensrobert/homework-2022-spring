@@ -1,5 +1,7 @@
-simd-test
-simd-test-*
+montecarlo
+montecarlo-*
+sample-arraymult
+sample-arraymult-*
 bin/
 out
 out.*

@@ -7,14 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 // CUDA runtime
 #include <cuda_runtime.h>
 
 // Helper functions and utilities to work with CUDA
 #include "helper_cuda.h"
 #include "helper_functions.h"
-
 
 // setting the number of trials in the monte carlo simulation:
 #ifndef NUMTRIALS
