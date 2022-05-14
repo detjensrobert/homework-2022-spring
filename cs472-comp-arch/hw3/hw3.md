@@ -81,16 +81,23 @@ value for AMAT for instruction accesses. [1 point]
 Computing the AMAT for data reads. (Note: Part B is only asking about data
 reads. Do not worry about behavior during a data write)
 
-i. Give the value of miss rateL1 for data reads. [1 point]
+i. Give the value of miss rate~L1~ for data reads. [1 point]
+
+    - miss rate~L1~: 0.05
 
 ii. Calculate the value of the AMAT for data reads using the above value, and
 other values you need. [2 point]
+
+\begin{align*}
+  AMAT &= HT_{L1} + MR_{L1} * (HT_{L2} + MR_{L2}*MP_{L2}) \\
+       &= 1ns + 0.05 * (15ns + 0.20 * 100ns) \\
+       &= 2.75ns \\
+\end{align*}
 
 ## Problem 2 [30 points]
 
 A processor accesses a 256 byte cache, with a block size of 64 bytes, with the
 following sequence of 32-bit addresses.
-
 
 - `0xFF0057F2`
 - `0xFF002311`
@@ -111,39 +118,41 @@ their initial state. Tables  have been provided for your convenience.
 
 ### Part A: Direct Mapped Cache [10 points]
 
-| Address (hex) | Tag (hex) | Index (binary) | Block Offset (binary) | Hit/Miss Replace? (Yes/No) |
-|---------------|-----------|----------------|-----------------------|----------------------------|
-| `0xFF0057F2`  |           |                |                       |                            |
-| `0xFF002311`  |           |                |                       |                            |
-| `0xEA022000`  |           |                |                       |                            |
-| `0xEA022011`  |           |                |                       |                            |
-| `0xFF006682`  |           |                |                       |                            |
-| `0x00000000`  |           |                |                       |                            |
-| `0xFF0057EA`  |           |                |                       |                            |
-| `0xEA022015`  |           |                |                       |                            |
+.
+
+| Address    | Tag       | Index | Block Offset | Hit/Miss Replace? |
+|------------|-----------|-------|--------------|-------------------|
+| `ff0057f2` | `1fe00af` | `111` | `110010`     | Miss              |
+| `ff002311` | `1fe0046` | `000` | `010001`     | Miss              |
+| `ea022000` | `1d40440` | `000` | `000000`     | Replace           |
+| `ea022011` | `1d40440` | `000` | `010001`     | Replace           |
+| `ff006682` | `1fe00cd` | `100` | `000010`     | Miss              |
+| `00000000` | `0000000` | `000` | `000000`     | Replace           |
+| `ff0057ea` | `1fe00af` | `111` | `101010`     | Replace           |
+| `ea022015` | `1d40440` | `000` | `010101`     | Replace           |
 
 ### Part B: Fully Associative Cache [10 points]
 
-| Address (hex) | Tag (hex) | Index (binary) | Block Offset (binary) | Hit/Miss Replace? (Yes/No) |
-|---------------|-----------|----------------|-----------------------|----------------------------|
-| `0xFF0057F2`  |           |                |                       |                            |
-| `0xFF002311`  |           |                |                       |                            |
-| `0xEA022000`  |           |                |                       |                            |
-| `0xEA022011`  |           |                |                       |                            |
-| `0xFF006682`  |           |                |                       |                            |
-| `0x00000000`  |           |                |                       |                            |
-| `0xFF0057EA`  |           |                |                       |                            |
-| `0xEA022015`  |           |                |                       |                            |
+| Address    | Tag        | Index | Block Offset | Hit/Miss Replace? |
+|------------|------------|-------|--------------|-------------------|
+| `ff0057f2` | `07f802bf` |       | `110010`     | Miss              |
+| `ff002311` | `07f80118` |       | `010001`     | Miss              |
+| `ea022000` | `07501100` |       | `000000`     | Miss              |
+| `ea022011` | `07501100` |       | `010001`     | Miss              |
+| `ff006682` | `07f80334` |       | `000010`     | Miss              |
+| `00000000` | `00000000` |       | `000000`     | Miss              |
+| `ff0057ea` | `07f802bf` |       | `101010`     | Miss              |
+| `ea022015` | `07501100` |       | `010101`     | Miss              |
 
 ### Part C: 2-Way Set Associative Cache [10 points]
 
-| Address (hex) | Tag (hex) | Index (binary) | Block Offset (binary) | Hit/Miss Replace? (Yes/No) |
-|---------------|-----------|----------------|-----------------------|----------------------------|
-| `0xFF0057F2`  |           |                |                       |                            |
-| `0xFF002311`  |           |                |                       |                            |
-| `0xEA022000`  |           |                |                       |                            |
-| `0xEA022011`  |           |                |                       |                            |
-| `0xFF006682`  |           |                |                       |                            |
-| `0x00000000`  |           |                |                       |                            |
-| `0xFF0057EA`  |           |                |                       |                            |
-| `0xEA022015`  |           |                |                       |                            |
+| Address    | Tag       | Index | Block Offset | Hit/Miss Replace? |
+|------------|-----------|-------|--------------|-------------------|
+| `ff0057f2` | `3fc015f` | `1`   | `110010`     | Miss              |
+| `ff002311` | `3fc008c` | `0`   | `010001`     | Miss              |
+| `ea022000` | `3a80880` | `0`   | `000000`     | Miss              |
+| `ea022011` | `3a80880` | `0`   | `010001`     | Replace           |
+| `ff006682` | `3fc019a` | `0`   | `000010`     | Replace           |
+| `00000000` | `0000000` | `0`   | `000000`     | Replace           |
+| `ff0057ea` | `3fc015f` | `1`   | `101010`     | Miss              |
+| `ea022015` | `3a80880` | `0`   | `010101`     | Replace           |
