@@ -16,19 +16,17 @@ author:
 
 ## Data
 
-- Show the table and the two graphs
-  - Graph of performance vs. NUMTRIALS with multiple curves of BLOCKSIZE
-  - Graph of performance vs. BLOCKSIZE with multiple curves of NUMTRIALS
-
 ```table
 ---
 include: results.csv
-caption: REPLACEME
+caption: CUDA Monte Carlo Simulation Performances
 ---
 ```
 
-\newcommand{\trials}{1024,4096,16384,65536,262144,1048576,2097152,4194304}
-\newcommand{\blocksizes}{8,32,128}
+\newcommand{\trials}{1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216,33554432}
+\newcommand{\tlabel}{1KB ,    ,    ,8K  ,     ,     ,64K  ,      ,      ,      ,1MB    ,       ,       ,8M     ,        ,32M     }
+
+\newcommand{\blocksizes}{8,32,128,256,512,1024}
 
 \pgfplotsset{
   axis lines = left,
@@ -46,6 +44,7 @@ caption: REPLACEME
       xlabel = {Number of Monte Carlo trials},
       ylabel = {Performance},
       xtick/.expand once = \trials,
+      xticklabels/.expand once = \tlabel,
     ]
       \foreach \B in \blocksizes {
         \addplot table[col sep=comma,x=trials,y=\B]{results-trials.csv};
