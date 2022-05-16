@@ -11,6 +11,9 @@ CUDA_NVCC	=	$(CUDA_BIN_PATH)/nvcc
 montecarlo:	ensure_cuda montecarlo.cu
 	$(CUDA_NVCC) -o montecarlo montecarlo.cu
 
+montecarlo-csv:	ensure_cuda montecarlo.cu
+	$(CUDA_NVCC) -o montecarlo montecarlo.cu -DCSV
+
 bench results.csv: montecarlo
 	echo 'trials,blocksize,performance,probability' > results.csv
 	for t in $(TRIALS); do \
