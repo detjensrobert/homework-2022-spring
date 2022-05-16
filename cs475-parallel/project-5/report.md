@@ -24,9 +24,9 @@ caption: CUDA Monte Carlo Simulation Performances
 ```
 
 \newcommand{\trials}{1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216,33554432}
-\newcommand{\tlabel}{1KB ,    ,    ,8K  ,     ,     ,64K  ,      ,      ,      ,1MB    ,       ,       ,8M     ,        ,32M     }
+\newcommand{\tlabel}{1K  ,    ,    ,8K  ,     ,     ,64K  ,      ,      ,      ,1M     ,       ,       ,8M     ,        ,32M     }
 
-\newcommand{\blocksizes}{8,32,128,256,512,1024}
+\newcommand{\blocksizes}{8,32,128}
 
 \pgfplotsset{
   axis lines = left,
