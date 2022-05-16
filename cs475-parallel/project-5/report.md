@@ -12,7 +12,7 @@ author:
 
 ## Runtime information
 
-- Tell what machine you ran this on
+These tests were initially run on `rabbit`, and were later re-run on the HPC cluster.
 
 ## Data
 

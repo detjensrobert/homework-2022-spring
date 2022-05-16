@@ -26,7 +26,7 @@
 #define NUMBLOCKS (NUMTRIALS / BLOCKSIZE)
 
 // ranges for the random numbers:
-#define PROJECT1
+// #define PROJECT1
 
 #ifdef PROJECT1
 const float TXMIN = -10.0;    // truck starting location in feet
