@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
           NUMTRIALS, BLOCKSIZE, megaTrialsPerSecond, probability);
 #else
   printf("%d,%d,%.4lf,%.2f\n", NUMTRIALS, BLOCKSIZE, megaTrialsPerSecond,
-         probability)
+         probability);
 #endif
 
   // clean up memory:
