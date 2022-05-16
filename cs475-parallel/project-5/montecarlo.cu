@@ -88,7 +88,13 @@ __global__ void MonteCarlo(IN float *dtxs, IN float *dtys, IN float *dtxvs,
 
   // randomize everything:
   float tx = dtxs[gid];
-  // TODO
+  float ty = tys[gid];
+  float txv = txvs[gid];
+  float sv = svs[gid];
+  float sthd = sths[gid];
+  float sthr = Radians(sthd);
+  float svx = sv * cos(sthr);
+  float svy = sv * sin(sthr);
 
   // how long until the snowball reaches the y depth:
   // TODO
