@@ -116,7 +116,7 @@ __global__ void MonteCarlo(IN float *dtxs, IN float *dtys, IN float *dtxvs,
 int main(int argc, char *argv[]) {
   TimeOfDaySeed();
 
-  int dev = findCudaDevice(argc, (const char **)argv);
+  // int dev = findCudaDevice(argc, (const char **)argv);
 
   float *htxs = new float[NUMTRIALS];
   float *htys = new float[NUMTRIALS];
@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
           "%10.4lf, Probability = %6.2f%%\n",
           NUMTRIALS, BLOCKSIZE, megaTrialsPerSecond, probability);
 #else
-  fprintf(stderr, "%d,%d,%.4lf,%.2f\n", NUMTRIALS, BLOCKSIZE,
+  printf("%d,%d,%.4lf,%.2f\n", NUMTRIALS, BLOCKSIZE,
           megaTrialsPerSecond, probability);
 #endif
 

@@ -14,16 +14,24 @@ montecarlo:	ensure_cuda montecarlo.cu
 montecarlo-csv:	ensure_cuda montecarlo.cu
 	$(CUDA_NVCC) -o montecarlo-csv montecarlo.cu -DCSV
 
-bench results.csv: montecarlo-csv
+bench: montecarlo-csv
 	echo 'trials,blocksize,performance,probability' > results.csv
 	for t in $(TRIALS); do \
 		for bs in $(BLOCKS); do \
 			$(CUDA_NVCC) -o montecarlo-csv montecarlo.cu -DNUMTRIALS=$$t -DBLOCKSIZE=$$bs -DCSV; \
-			./montecarlo-csv 2>> results.csv; \
+			./montecarlo-csv >> results.csv; \
 		done; \
 	done
 
-report: report.md results.csv
+bench-rabbit results.csv:
+	ssh rabbit.engr.oregonstate.edu 'cd ~/repos/homework-2022-spring/cs475-parallel/project-4 && git pull -q && make bench'
+	scp rabbit.engr.oregonstate.edu:repos/homework-2022-spring/cs475-parallel/project-4/results.csv results-flip.csv
+
+pivot: results.csv
+	mlr --csv cut -x -f probability then reshape -s trials,performance results.csv > results-blocksize.csv
+	mlr --csv cut -x -f probability then reshape -s blocksize,performance results.csv > results-trials.csv
+
+report: report.md pivot
 	pandoc -s report.md -o report.pdf -V geometry:margin=1in --highlight=tango -F pantable
 
 .PHONY: clean

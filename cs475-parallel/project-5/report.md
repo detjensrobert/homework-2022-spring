@@ -23,9 +23,12 @@ author:
 ```table
 ---
 include: results.csv
-caption:REPLACEME
+caption: REPLACEME
 ---
 ```
+
+\newcommand{\trials}{1024,4096,16384,65536,262144,1048576,2097152,4194304}
+\newcommand{\blocksizes}{8,32,128}
 
 \pgfplotsset{
   axis lines = left,
@@ -40,14 +43,37 @@ caption:REPLACEME
   \begin{tikzpicture}
     \begin{axis}[
       xmode = log,
-      xlabel = {Array Sizes (bytes)},
-      ylabel = {Speedup},
+      xlabel = {Number of Monte Carlo trials},
+      ylabel = {Performance},
+      xtick/.expand once = \trials,
     ]
-      \addplot table[col sep=comma,x=array-size,y=mult-speedup]{results-flip.csv};
-      \addlegendentry{Speedup (Multiply) on \texttt{flip}}
+      \foreach \B in \blocksizes {
+        \addplot table[col sep=comma,x=trials,y=\B]{results-trials.csv};
+        \addlegendentryexpanded{\B \ block size}
+      }
      \end{axis}
   \end{tikzpicture}
-  \caption{Array Size vs. SIMD Speedup Factor for multiply-reduce}
+  \caption{Performance vs. Trial Count across different block sizes}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      xmode = log,
+      xlabel = {Block Size},
+      ylabel = {Performance},
+      xtick/.expand once = \blocksizes,
+      scaled ticks = false,
+      log ticks with fixed point,
+    ]
+      \foreach \T in \trials {
+        \addplot table[col sep=comma,x=blocksize,y=\T]{results-blocksize.csv};
+        \addlegendentryexpanded{\T \ trials}
+      }
+     \end{axis}
+  \end{tikzpicture}
+  \caption{Performance vs. Trial Count across different block sizes}
 \end{figure}
 
 ## Analysis
