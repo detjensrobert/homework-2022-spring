@@ -12,9 +12,9 @@ montecarlo:	ensure_cuda montecarlo.cu
 	$(CUDA_NVCC) -o montecarlo montecarlo.cu
 
 montecarlo-csv:	ensure_cuda montecarlo.cu
-	$(CUDA_NVCC) -o montecarlo montecarlo.cu -DCSV
+	$(CUDA_NVCC) -o montecarlo-csv montecarlo.cu -DCSV
 
-bench results.csv: montecarlo
+bench results.csv: montecarlo-csv
 	echo 'trials,blocksize,performance,probability' > results.csv
 	for t in $(TRIALS); do \
 		for bs in $(BLOCKS); do \
@@ -31,7 +31,7 @@ clean:
 	git clean -dfX
 
 ensure_cuda:
-	@ test -f $(CUDA_NVCC) || (echo 'ERR: this system does not have CUDA installed!' 1>&2 ; exit 1)
+	test -f $(CUDA_NVCC)
 
 sample-arraymult:	ensure_cuda sample-arraymult.cu
 	$(CUDA_NVCC) -o sample-arraymult sample-arraymult.cu
