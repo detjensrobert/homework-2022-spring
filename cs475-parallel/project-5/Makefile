@@ -1,8 +1,5 @@
 CC = g++ -g -lm -fopenmp -O0
 
-THREADS = 1 2 4 8 12 16 20 24 32
-ARRAYSIZE = $(shell ruby -e 'puts (10..23).map {|p| 2**p }')
-
 TRIALS = 1024 4096 16384 65536 262144 1048576 2097152 4194304
 BLOCKS = 8 32 128
 

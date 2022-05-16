@@ -87,18 +87,26 @@ __global__ void MonteCarlo(IN float *dtxs, IN float *dtys, IN float *dtxvs,
   dhits[gid] = 0;
 
   // randomize everything:
-  float tx = dtxs[gid];
-  float ty = tys[gid];
-  float txv = txvs[gid];
-  float sv = svs[gid];
-  float sthd = sths[gid];
-  float sthr = Radians(sthd);
-  float svx = sv * cos(sthr);
-  float svy = sv * sin(sthr);
+  float truck_x = dtxs[gid];
+  float truck_y = dtys[gid];
+  float truck_velx = dtxvs[gid];
+  float snow_vel = dsvs[gid];
+  float snow_angle_deg = dsths[gid];
+  float snow_angle_rad = Radians(snow_angle_deg);
+  float snow_velx = snow_vel * cos(snow_angle_rad);
+  float snow_vely = snow_vel * sin(snow_angle_rad);
 
   // how long until the snowball reaches the y depth:
-  // TODO
-  if (1 /* TODO */) {
+  float t = truck_y / snow_vely;
+
+  // how far the truck has moved in x in that amount of time:
+  float truckx = truck_x + truck_velx * t;
+
+  // how far the snowball has moved in x in that amount of time:
+  float snow_x = snow_velx * t;
+
+  // does the snowball hit the truck (just check x distances, not height):
+  if (fabs(snow_x - truckx) < 20) {
     dhits[gid] = 1;
   }
 }
@@ -137,27 +145,44 @@ int main(int argc, char *argv[]) {
   // cudaError_t status;
   cudaMalloc((void **)(&dtxs), NUMTRIALS * sizeof(float));
   CudaCheckError();
-
-  // TODO
-
-  // copy host memory to the device:
-
-  cudaMemcpy(dtxs, htxs, NUMTRIALS * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)(&dtys), NUMTRIALS * sizeof(float));
+  CudaCheckError();
+  cudaMalloc((void **)(&dtxvs), NUMTRIALS * sizeof(float));
+  CudaCheckError();
+  cudaMalloc((void **)(&dsvs), NUMTRIALS * sizeof(float));
+  CudaCheckError();
+  cudaMalloc((void **)(&dsths), NUMTRIALS * sizeof(float));
+  CudaCheckError();
+  cudaMalloc((void **)(&dhalflens), NUMTRIALS * sizeof(float));
+  CudaCheckError();
+  cudaMalloc((void **)(&dhits), NUMTRIALS * sizeof(int));
   CudaCheckError();
 
-  // TODO
+  // copy host memory to the device:
+  cudaMemcpy(dtxs, htxs, NUMTRIALS * sizeof(float), cudaMemcpyHostToDevice);
+  CudaCheckError();
+  cudaMemcpy(dtys, htys, NUMTRIALS * sizeof(float), cudaMemcpyHostToDevice);
+  CudaCheckError();
+  cudaMemcpy(dtxvs, htxvs, NUMTRIALS * sizeof(float), cudaMemcpyHostToDevice);
+  CudaCheckError();
+  cudaMemcpy(dsvs, hsvs, NUMTRIALS * sizeof(float), cudaMemcpyHostToDevice);
+  CudaCheckError();
+  cudaMemcpy(dsths, hsths, NUMTRIALS * sizeof(float), cudaMemcpyHostToDevice);
+  CudaCheckError();
+  cudaMemcpy(dhalflens, hhalflens, NUMTRIALS * sizeof(float),
+             cudaMemcpyHostToDevice);
+  CudaCheckError();
+  cudaMemcpy(dhits, hhits, NUMTRIALS * sizeof(float), cudaMemcpyHostToDevice);
+  CudaCheckError();
 
   // setup the execution parameters:
-
   dim3 threads(BLOCKSIZE, 1, 1);
   dim3 grid(NUMBLOCKS, 1, 1);
 
   // create and start timer
-
   cudaDeviceSynchronize();
 
   // allocate CUDA events that we'll use for timing:
-
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
   CudaCheckError();
@@ -165,22 +190,18 @@ int main(int argc, char *argv[]) {
   CudaCheckError();
 
   // record the start event:
-
   cudaEventRecord(start, NULL);
   CudaCheckError();
 
   // execute the kernel:
-
   MonteCarlo<<<grid, threads>>>(dtxs, dtys, dtxvs, dsvs, dsths, dhalflens,
                                 dhits);
 
   // record the stop event:
-
   cudaEventRecord(stop, NULL);
   CudaCheckError();
 
   // wait for the stop event to complete:
-
   cudaEventSynchronize(stop);
   CudaCheckError();
 
@@ -189,26 +210,31 @@ int main(int argc, char *argv[]) {
   CudaCheckError();
 
   // copy result from the device to the host:
-
   cudaMemcpy(hhits, dhits, NUMTRIALS * sizeof(int), cudaMemcpyDeviceToHost);
   CudaCheckError();
 
   // compute the sum :
-
   int numHits = 0;
-  // ????
+#pragma omp parallel for default(none) shared(hhits) reduction(+ : numhits)
+  for (int i = 0; i < NUMTRIALS; i++) {
+    numHits += hhits[i];
+  }
 
   float probability = 100.f * (float)numHits / (float)NUMTRIALS;
 
   // compute and printL
-
   double secondsTotal = 0.001 * (double)msecTotal;
   double trialsPerSecond = (float)NUMTRIALS / secondsTotal;
   double megaTrialsPerSecond = trialsPerSecond / 1000000.;
+#ifndef CSV
   fprintf(stderr,
           "Number of Trials = %10d, Blocksize = %8d, MegaTrials/Second = "
           "%10.4lf, Probability = %6.2f%%\n",
           NUMTRIALS, BLOCKSIZE, megaTrialsPerSecond, probability);
+#else
+  printf("%d,%d,%.4lf,%.2f\n", NUMTRIALS, BLOCKSIZE, megaTrialsPerSecond,
+         probability)
+#endif
 
   // clean up memory:
   delete[] htxs;
