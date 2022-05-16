@@ -19,7 +19,7 @@ bench results.csv: montecarlo-csv
 	for t in $(TRIALS); do \
 		for bs in $(BLOCKS); do \
 			$(CUDA_NVCC) -o montecarlo-csv montecarlo.cu -DNUMTRIALS=$$t -DBLOCKSIZE=$$bs -DCSV; \
-			./montecarlo-csv >> results.csv; \
+			./montecarlo-csv 2>> results.csv; \
 		done; \
 	done
 

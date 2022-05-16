@@ -232,8 +232,8 @@ int main(int argc, char *argv[]) {
           "%10.4lf, Probability = %6.2f%%\n",
           NUMTRIALS, BLOCKSIZE, megaTrialsPerSecond, probability);
 #else
-  printf("%d,%d,%.4lf,%.2f\n", NUMTRIALS, BLOCKSIZE, megaTrialsPerSecond,
-         probability);
+  fprintf(stderr, "%d,%d,%.4lf,%.2f\n", NUMTRIALS, BLOCKSIZE,
+          megaTrialsPerSecond, probability);
 #endif
 
   // clean up memory:
