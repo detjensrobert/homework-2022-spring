@@ -3,6 +3,10 @@ header-includes:
   - \usepackage{pgfplots}
   - \usepackage{pgfplotstable}
   - \pgfplotsset{compat=1.18}
+  - \usepackage{float}
+  - \makeatletter
+  - \def\fps@figure{H}
+  - \makeatother
 
 title: 'CS 475 Project 5: CUDA Monte Carlo Simulation'
 author:
@@ -12,7 +16,9 @@ author:
 
 ## Runtime information
 
-These tests were initially run on `rabbit`, and were later re-run on the HPC cluster.
+These tests were initially run on `rabbit`, and were later re-run on the HPC
+cluster. The displayed data is from the HPC cluster,
+
 
 ## Data
 
@@ -34,15 +40,17 @@ caption: CUDA Monte Carlo Simulation Performances
   grid style = {dashed,gray!30},
   legend pos = outer north east,
   legend cell align = left,
+  scaled ticks = false,
+  log ticks with fixed point,
 }
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
       xmode = log,
       xlabel = {Number of Monte Carlo trials},
-      ylabel = {Performance},
+      ylabel = {Performance (MT/s)},
       xtick/.expand once = \trials,
       xticklabels/.expand once = \tlabel,
     ]
@@ -55,16 +63,14 @@ caption: CUDA Monte Carlo Simulation Performances
   \caption{Performance vs. Trial Count across different block sizes}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
       xmode = log,
       xlabel = {Block Size},
-      ylabel = {Performance},
+      ylabel = {Performance (MT/s)},
       xtick/.expand once = \blocksizes,
-      scaled ticks = false,
-      log ticks with fixed point,
     ]
       \foreach \T in \trials {
         \addplot table[col sep=comma,x=blocksize,y=\T]{results-blocksize.csv};
@@ -77,9 +83,22 @@ caption: CUDA Monte Carlo Simulation Performances
 
 ## Analysis
 
+Each larger block size has much higher performance, and larger arrays also
+increase performance.
 
-- What patterns are you seeing in the performance curves?
-- Why do you think the patterns look this way?
-- Why is a BLOCKSIZE of 8 so much worse than the others?
-- How do these performance results compare with what you got in Project #1? Why?
-- What does this mean for the proper use of GPU parallel computing?
+GPU cores are scheduled in groups of 32 called warps. When only 8 threads are
+grouped together for this compute task, only a quarter of the cores of the GPU
+warp are performing work. Since all threads in the warp execute the same
+instruction, these extra cores both are not and cannot do other work. A block
+size of 32 threads does saturate the warp, but loses performance due to waiting
+on memory accesses. A larger multiple of the warp size, e.g. 128 here, fully
+saturate the compute performance as while one warp of 32 threads is waiting for
+memory access, another group can be swapped in so there is no idle time.
+
+Using GPU compute for this simulation yielded over 130x the performance of Project 1, based on my 12-core system:
+
+$$
+\frac{28260.4575}{213.48} = 132.38
+$$
+
+For proper GPU usage, there must be enough threads in a group to A) saturate the warp size, and B) to saturate compute time while other threads are waiting for memory access. If there are more threads, than performance won't increase past a certain amount, as the block will already be fully saturated.

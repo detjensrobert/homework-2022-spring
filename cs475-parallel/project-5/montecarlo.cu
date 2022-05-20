@@ -106,7 +106,7 @@ __global__ void MonteCarlo(IN float *dtxs, IN float *dtys, IN float *dtxvs,
   float snow_x = snow_velx * t;
 
   // does the snowball hit the truck (just check x distances, not height):
-  if (fabs(snow_x - truckx) < 20) {
+  if (fabs(snow_x - truckx) < dhalflens[gid]) {
     dhits[gid] = 1;
   }
 }
