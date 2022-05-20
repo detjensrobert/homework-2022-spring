@@ -95,10 +95,10 @@ on memory accesses. A larger multiple of the warp size, e.g. 128 here, fully
 saturate the compute performance as while one warp of 32 threads is waiting for
 memory access, another group can be swapped in so there is no idle time.
 
-Using GPU compute for this simulation yielded over 130x the performance of Project 1, based on my 12-core system:
+Using GPU compute for this simulation yielded over two orders of magnitude of  performance over Project 1, based on my 12-core system:
 
 $$
-\frac{28260.4575}{213.48} = 132.38
+\frac{25346.9031}{213.48} = 118.73
 $$
 
 For proper GPU usage, there must be enough threads in a group to A) saturate the warp size, and B) to saturate compute time while other threads are waiting for memory access. If there are more threads, than performance won't increase past a certain amount, as the block will already be fully saturated.
