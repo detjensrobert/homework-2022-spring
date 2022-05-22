@@ -1,6 +1,9 @@
 ---
 title: CS 472 HW 3
-author: Robert Detjens
+author:
+  - Robert Detjens
+  - '933604667'
+  - Undergraduate
 ---
 
 ## Problem 1 [10 points]
