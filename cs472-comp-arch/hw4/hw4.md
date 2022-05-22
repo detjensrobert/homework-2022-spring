@@ -24,7 +24,8 @@ author:
 > Assuming a cache block size of 4 bytes, show the above loop with compiler
 > inserted prefetch instructions (as seen in class).
 
-I assume the integer type is also 4 bytes / 32 bits, since MIPS works on 32-bit words, so each element is one cache block.
+I assume the integer type is also 4 bytes / 32 bits, since MIPS works on 32-bit
+words, so each element is one cache block.
 
 $$k = \frac{miss\ penalty}{iter\ time} = \frac{64\ cyc}{8\ cyc/iter} = 8\ iters\ ahead$$
 
@@ -103,26 +104,32 @@ A) List the four bytes in the word beginning at physical address `0x34`.
 
     `0x 65 72 20 67`
 
-B) How many virtual addresses refer to the first byte of the shaded word in row `0x2_`? List them.
+B) How many virtual addresses refer to the first byte of the shaded word in row
+`0x2_`? List them.
 
     1. `000000 0100` / `0x004`
 
-C) How many virtual addresses refer to the first byte of the shaded word in row `0x4_`? List them.
+C) How many virtual addresses refer to the first byte of the shaded word in row
+`0x4_`? List them.
 
     1. `000001 1000` / `0x018`
     2. `000100 1000` / `0x048`
 
-D) How many virtual addresses refer to the first byte of the shaded word in row `0x6_`? List them.
+D) How many virtual addresses refer to the first byte of the shaded word in row
+`0x6_`? List them.
 
     No virtual addresses are mapped to page `0x6`.
 
-E) What data is returned if the program loads a word from virtual address `0x05C` (`000101 1100`)?
+E) What data is returned if the program loads a word from virtual address
+`0x05C` (`000101 1100`)?
 
     `0x05c` virtual -> `0x7C` physical = `0x73`
 
-F) What is the result if the program loads a word from virtual address `0x064` (`000110 0010`)?
+F) What is the result if the program loads a word from virtual address `0x064`
+(`000110 0010`)?
 
-    `0x064` virtual -> `0x94` physical = page fault exception, address is outside physical memory
+    `0x064` virtual -> `0x94` physical = page fault exception, address is
+    outside physical memory
 
 \pagebreak
 
@@ -143,7 +150,6 @@ F) What is the result if the program loads a word from virtual address `0x064` (
 > Which bits of the virtual address are used to obtain a virtual to physical
 > translation from the TLB? Explain exactly how these bits are used to make the
 > translation, assuming there is a TLB hit.
-
 
 
 
