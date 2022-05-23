@@ -136,14 +136,14 @@ F) What is the result if the program loads a word from virtual address `0x064`
 ## Problem 3 [4 points]
 
 > Consider a system with the following processor components and policies:
-
-- A direct-mapped L1 data cache of size 4KB ($4 * 2^{10}$ bytes) and block size
-  of 16 bytes, indexed and tagged using physical addresses, and using a
-  write-allocate, write-back policy
-- A fully-associative data TLB with 4 entries and an LRU replacement policy
-- Physical addresses of 32 bits, and virtual addresses of 40 bits
-- Byte addressable memory
-- Page size of 1MB
+>
+> - A direct-mapped L1 data cache of size 4KB ($4 * 2^{10}$ bytes) and block
+>   size of 16 bytes, indexed and tagged using physical addresses, and using a
+>   write-allocate, write-back policy
+> - A fully-associative data TLB with 4 entries and an LRU replacement policy
+> - Physical addresses of 32 bits, and virtual addresses of 40 bits
+> - Byte addressable memory
+> - Page size of 1MB
 
 ### Part A [2 points]
 
@@ -151,7 +151,14 @@ F) What is the result if the program loads a word from virtual address `0x064`
 > translation from the TLB? Explain exactly how these bits are used to make the
 > translation, assuming there is a TLB hit.
 
+Page size is 1MB = $2^{20}$ bytes, so lower 20 bits are needed for the page
+index. The other upper 20 bits are the virtual page, and this is what is used to
+map virtual pages to physical pages.
 
+The TLB translation cache is fully-associative, so there is no cache set index
+and the entire 20-bit virtual page number is used as the tag. If there is a TLB
+cache hit, the corresponding physical page address is the data in the cache for
+that tag.
 
 ### Part B [2 points]
 
@@ -159,3 +166,19 @@ F) What is the result if the program loads a word from virtual address `0x064`
 > block offset bits for accessing the L1 data cache? Explicitly specify which of
 > these bits can be used directly from the virtual address without any
 > translation.
+
+L1 cache has $4*2^{10} / 16 = 256$ entries, so 8 bits needed for index \
+block size is 16B, so 4 bits needed for block offset
+
+The 32-bit physical address is for cache indexing:
+
+```c
+/--page # --\/--page byte offset--\
+00000000 00000000 00000000 00000000
+\-- data cache tag --/\-index-/\--/
+                                 /
+                     block offset
+```
+
+The page byte offset is not translated by the TLB and can be used to index the
+cache directly.
