@@ -1,0 +1,7 @@
+first
+first-*
+printinfo
+bin/
+out
+out.*
+*.csv
