@@ -123,7 +123,7 @@ D) How many virtual addresses refer to the first byte of the shaded word in row
 E) What data is returned if the program loads a word from virtual address
 `0x05C` (`000101 1100`)?
 
-    `0x05c` virtual -> `0x7C` physical = `0x73`
+    `0x05c` virtual -> `0x7C` physical = `0x73 61 79 20`
 
 F) What is the result if the program loads a word from virtual address `0x064`
 (`000110 0010`)?
