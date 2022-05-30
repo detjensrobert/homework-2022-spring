@@ -1,28 +1,40 @@
 CC = g++ -g -lm -fopenmp -lOpenCL
 
 GLOBAL_WORKS = $(shell ruby -e 'puts (10..23).map {|p| 2**p }')
-LOCAL_WORKS = $(shell ruby -e 'puts (3..9).map {|p| 2**p }')
+LOCAL_WORKS = $(shell ruby -e 'puts (3..8).map {|p| 2**p }')
 
-first: first.cpp
-	$(CC) -o first first.cpp
+runner: runner.cpp
+	$(CC) -o runner runner.cpp
 
 printinfo: printinfo.cpp
 	$(CC) -o printinfo printinfo.cpp
 
-bench results.csv: montecarlo.cu Makefile
-	echo 'trials,blocksize,performance,probability' > results.csv
-	for t in $(TRIALS); do \
-		for bs in $(BLOCKS); do \
-			$(CUDA_NVCC) -o montecarlo-csv montecarlo.cu -DNUMTRIALS=$$t -DBLOCKSIZE=$$bs -DCSV; \
-			./montecarlo-csv;\
+results-mult.csv: runner.cpp array-mult.cl
+	echo 'globalsize,localsize,workgroups,performance' > results-mult.csv
+	for t in $(GLOBAL_WORKS); do \
+		for bs in $(LOCAL_WORKS); do \
+			$(CC) -o runner-csv runner.cpp -DCSV -DLOCAL_SIZE=$$bs -DNUM_ELEMENTS=$$t -DCL_FILE_NAME='"array-mult.cl"' ; \
+			./runner-csv;\
 		done;  \
-	done >> results.csv;
+	done >> results-mult.csv;
 
-pivot results-blocksize.csv: results.csv
-	mlr --csv cut -x -f probability then reshape -s trials,performance results.csv > results-blocksize.csv
-	mlr --csv cut -x -f probability then reshape -s blocksize,performance results.csv > results-trials.csv
+results-multadd.csv: runner.cpp array-mult.cl
+	echo 'globalsize,localsize,workgroups,performance' > results-multadd.csv
+	for t in $(GLOBAL_WORKS); do \
+		for bs in $(LOCAL_WORKS); do \
+			$(CC) -o runner-csv runner.cpp -DCSV -DLOCAL_SIZE=$$bs -DNUM_ELEMENTS=$$t -DCL_FILE_NAME='"array-mult-sum.cl"' ; \
+			./runner-csv;\
+		done;  \
+	done >> results-multadd.csv;
 
-report: report.md results.csv results-blocksize.csv
+pivot results-mult-local.csv: results-mult.csv results-multadd.csv
+	mlr --csv cut -x -f workgroups then reshape -s globalsize,performance results-mult.csv > results-mult-local.csv
+	mlr --csv cut -x -f workgroups then reshape -s localsize,performance  results-mult.csv > results-mult-global.csv
+
+	mlr --csv cut -x -f workgroups then reshape -s globalsize,performance results-multadd.csv > results-multadd-local.csv
+	mlr --csv cut -x -f workgroups then reshape -s localsize,performance  results-multadd.csv > results-multadd-global.csv
+
+report: report.md results-mult.csv results-multadd.csv results-mult-local.csv
 	pandoc -s report.md -o report.pdf -V geometry:margin=1in --highlight=tango -F pantable
 
 .PHONY: clean

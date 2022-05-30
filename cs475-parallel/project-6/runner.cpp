@@ -14,11 +14,9 @@
 #include "CL/cl.h"
 #include "CL/cl_platform.h"
 
-#ifndef NMB
-#define NMB 64
+#ifndef NUM_ELEMENTS
+#define NUM_ELEMENTS (64 * 1024 * 1024)
 #endif
-
-#define NUM_ELEMENTS NMB * 1024 * 1024
 
 #ifndef LOCAL_SIZE
 #define LOCAL_SIZE 64
@@ -26,7 +24,9 @@
 
 #define NUM_WORK_GROUPS NUM_ELEMENTS / LOCAL_SIZE
 
-const char *CL_FILE_NAME = {"first.cl"};
+#ifndef CL_FILE_NAME
+#define CL_FILE_NAME "array-mult.cl"
+#endif
 
 void Wait(cl_command_queue);
 int LookAtTheBits(float);
@@ -35,8 +35,7 @@ int main(int argc, char *argv[]) {
   // see if we can even open the opencl kernel program
   // (no point going on if we can't):
 
-  FILE *fp;
-  fp = fopen(CL_FILE_NAME, "r");
+  FILE *fp = fopen(CL_FILE_NAME, "r");
   if (fp == NULL) {
     fprintf(stderr, "Cannot open OpenCL source file '%s'\n", CL_FILE_NAME);
     return 1;
@@ -61,14 +60,15 @@ int main(int argc, char *argv[]) {
 
   // 2. allocate the host memory buffers:
 
-  float *hA = new float[NUM_ELEMENTS];
-  float *hB = new float[NUM_ELEMENTS];
-  float *hC = new float[NUM_ELEMENTS];
+  float *host_A = new float[NUM_ELEMENTS];
+  float *host_B = new float[NUM_ELEMENTS];
+  float *host_C = new float[NUM_ELEMENTS];
+  float *host_D = new float[NUM_ELEMENTS];
 
   // fill the host memory buffers:
 
   for (int i = 0; i < NUM_ELEMENTS; i++) {
-    hA[i] = hB[i] = (float)sqrt((double)i);
+    host_A[i] = host_B[i] = host_C[i] = (float)sqrt((double)i);
   }
 
   size_t dataSize = NUM_ELEMENTS * sizeof(float);
@@ -87,33 +87,43 @@ int main(int argc, char *argv[]) {
 
   // 5. allocate the device memory buffers:
 
-  cl_mem dA =
+  cl_mem device_A =
       clCreateBuffer(context, CL_MEM_READ_ONLY, dataSize, NULL, &status);
   if (status != CL_SUCCESS)
     fprintf(stderr, "clCreateBuffer failed (1)\n");
 
-  cl_mem dB =
+  cl_mem device_B =
       clCreateBuffer(context, CL_MEM_READ_ONLY, dataSize, NULL, &status);
   if (status != CL_SUCCESS)
     fprintf(stderr, "clCreateBuffer failed (2)\n");
 
-  cl_mem dC =
+  cl_mem device_C =
       clCreateBuffer(context, CL_MEM_WRITE_ONLY, dataSize, NULL, &status);
   if (status != CL_SUCCESS)
     fprintf(stderr, "clCreateBuffer failed (3)\n");
 
+  cl_mem device_D =
+      clCreateBuffer(context, CL_MEM_WRITE_ONLY, dataSize, NULL, &status);
+  if (status != CL_SUCCESS)
+    fprintf(stderr, "clCreateBuffer failed (4)\n");
+
   // 6. enqueue the 2 commands to write the data from the host buffers to the
   // device buffers:
 
-  status = clEnqueueWriteBuffer(cmdQueue, dA, CL_FALSE, 0, dataSize, hA, 0,
-                                NULL, NULL);
+  status = clEnqueueWriteBuffer(cmdQueue, device_A, CL_FALSE, 0, dataSize,
+                                host_A, 0, NULL, NULL);
   if (status != CL_SUCCESS)
     fprintf(stderr, "clEnqueueWriteBuffer failed (1)\n");
 
-  status = clEnqueueWriteBuffer(cmdQueue, dB, CL_FALSE, 0, dataSize, hB, 0,
-                                NULL, NULL);
+  status = clEnqueueWriteBuffer(cmdQueue, device_B, CL_FALSE, 0, dataSize,
+                                host_B, 0, NULL, NULL);
   if (status != CL_SUCCESS)
     fprintf(stderr, "clEnqueueWriteBuffer failed (2)\n");
+
+  status = clEnqueueWriteBuffer(cmdQueue, device_C, CL_FALSE, 0, dataSize,
+                                host_C, 0, NULL, NULL);
+  if (status != CL_SUCCESS)
+    fprintf(stderr, "clEnqueueWriteBuffer failed (3)\n");
 
   Wait(cmdQueue);
 
@@ -128,7 +138,7 @@ int main(int argc, char *argv[]) {
   fclose(fp);
   if (n != fileSize)
     fprintf(stderr,
-            "Expected to read %d bytes read from '%s' -- actually read %d.\n",
+            "Expected to read %zu bytes read from '%s' -- actually read %zu.\n",
             fileSize, CL_FILE_NAME, n);
 
   // create the text for the kernel program:
@@ -143,7 +153,7 @@ int main(int argc, char *argv[]) {
 
   // 8. compile and link the kernel code:
 
-  const char *options = {""};
+  const char *options = "";
   status = clBuildProgram(program, 1, &device, options, NULL, NULL);
   if (status != CL_SUCCESS) {
     size_t size;
@@ -164,17 +174,21 @@ int main(int argc, char *argv[]) {
 
   // 10. setup the arguments to the kernel object:
 
-  status = clSetKernelArg(kernel, 0, sizeof(cl_mem), &dA);
+  status = clSetKernelArg(kernel, 0, sizeof(cl_mem), &device_A);
   if (status != CL_SUCCESS)
     fprintf(stderr, "clSetKernelArg failed (1)\n");
 
-  status = clSetKernelArg(kernel, 1, sizeof(cl_mem), &dB);
+  status = clSetKernelArg(kernel, 1, sizeof(cl_mem), &device_B);
   if (status != CL_SUCCESS)
     fprintf(stderr, "clSetKernelArg failed (2)\n");
 
-  status = clSetKernelArg(kernel, 2, sizeof(cl_mem), &dC);
+  status = clSetKernelArg(kernel, 2, sizeof(cl_mem), &device_C);
   if (status != CL_SUCCESS)
     fprintf(stderr, "clSetKernelArg failed (3)\n");
+
+  status = clSetKernelArg(kernel, 3, sizeof(cl_mem), &device_D);
+  if (status != CL_SUCCESS)
+    fprintf(stderr, "clSetKernelArg failed (4)\n");
 
   // 11. enqueue the kernel object for execution:
 
@@ -196,27 +210,34 @@ int main(int argc, char *argv[]) {
 
   // 12. read the results buffer back from the device to the host:
 
-  status = clEnqueueReadBuffer(cmdQueue, dC, CL_TRUE, 0, dataSize, hC, 0, NULL,
-                               NULL);
+  status = clEnqueueReadBuffer(cmdQueue, device_C, CL_TRUE, 0, dataSize, host_C,
+                               0, NULL, NULL);
   if (status != CL_SUCCESS)
     fprintf(stderr, "clEnqueueReadBuffer failed\n");
 
-  fprintf(stderr, "%8d\t%4d\t%10d\t%10.3lf GigaMultsPerSecond\n", NMB,
+#ifndef CSV
+  fprintf(stderr, "%8d\t%4d\t%10d\t%10.3lf GigaMultsPerSecond\n", NUM_ELEMENTS,
           LOCAL_SIZE, NUM_WORK_GROUPS,
           (double)NUM_ELEMENTS / (time1 - time0) / 1000000000.);
+#else
+  printf("%d,%d,%d,%lf\n", NUM_ELEMENTS, LOCAL_SIZE, NUM_WORK_GROUPS,
+         (double)NUM_ELEMENTS / (time1 - time0) / 1000000000.);
+#endif
 
   // 13. clean everything up:
 
   clReleaseKernel(kernel);
   clReleaseProgram(program);
   clReleaseCommandQueue(cmdQueue);
-  clReleaseMemObject(dA);
-  clReleaseMemObject(dB);
-  clReleaseMemObject(dC);
+  clReleaseMemObject(device_A);
+  clReleaseMemObject(device_B);
+  clReleaseMemObject(device_C);
+  clReleaseMemObject(device_D);
 
-  delete[] hA;
-  delete[] hB;
-  delete[] hC;
+  delete[] host_A;
+  delete[] host_B;
+  delete[] host_C;
+  delete[] host_D;
 
   return 0;
 }

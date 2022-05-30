@@ -16,19 +16,30 @@ author:
 
 ## Runtime information
 
+These benchmarks were done on my local machine, with an AMD Ryzen 2600 CPU and RX480 GPU.
+
+The RX480 only supports work group sizes of up to 256, so these tests go from 8 to 256 instead of up to 512.
+
 ## Data
 
 ```table
 ---
-include: results.csv
-caption: OpenCL Reduce Data
+include: results-mult.csv
+caption: OpenCL Multiply Data
 ---
 ```
 
-\newcommand{\trials}{1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216,33554432}
-\newcommand{\tlabel}{1K  ,    ,    ,8K  ,     ,     ,64K  ,      ,      ,      ,1M     ,       ,       ,8M     ,        ,32M     }
+```table
+---
+include: results-multadd.csv
+caption: OpenCL Multiply & Add Data
+---
+```
 
-\newcommand{\blocksizes}{8,32,128}
+\newcommand{\globalsize}{1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608}
+\newcommand{\globallabel}{1K  ,    ,    ,8K  ,     ,     ,64K  ,      ,      ,      ,1M     ,       ,       ,8M    }
+
+\newcommand{\localsize}{8,16,32,64,128,256}
 
 \pgfplotsset{
   axis lines = left,
@@ -38,6 +49,7 @@ caption: OpenCL Reduce Data
   legend cell align = left,
   scaled ticks = false,
   log ticks with fixed point,
+  cycle list name = color list,
 }
 
 \begin{figure}[H]
@@ -45,18 +57,19 @@ caption: OpenCL Reduce Data
   \begin{tikzpicture}
     \begin{axis}[
       xmode = log,
-      xlabel = {Number of Monte Carlo trials},
-      ylabel = {Performance (MT/s)},
-      xtick/.expand once = \trials,
-      xticklabels/.expand once = \tlabel,
+      ymode = log,
+      xlabel = {Global Array Size},
+      ylabel = {Performance (GMult/s) (log scale)},
+      xtick/.expand once = \globalsize,
+      xticklabels/.expand once = \globallabel,
     ]
-      \foreach \B in \blocksizes {
-        \addplot table[col sep=comma,x=trials,y=\B]{results-trials.csv};
-        \addlegendentryexpanded{\B \ block size}
+      \foreach \L in \localsize {
+        \addplot table[col sep=comma,x=globalsize,y=\L]{results-mult-global.csv};
+        \addlegendentryexpanded{\L \ local workgroup size}
       }
      \end{axis}
   \end{tikzpicture}
-  \caption{Performance vs. Trial Count across different block sizes}
+  \caption{Performance vs. Global Array Size across different local sizes}
 \end{figure}
 
 \begin{figure}[H]
@@ -64,17 +77,17 @@ caption: OpenCL Reduce Data
   \begin{tikzpicture}
     \begin{axis}[
       xmode = log,
-      xlabel = {Block Size},
-      ylabel = {Performance (MT/s)},
-      xtick/.expand once = \blocksizes,
+      xlabel = {Local Workgroup Size},
+      ylabel = {Performance (GMult/s)},
+      xtick/.expand once = \localsize,
     ]
-      \foreach \T in \trials {
-        \addplot table[col sep=comma,x=blocksize,y=\T]{results-blocksize.csv};
-        \addlegendentryexpanded{\T \ trials}
+      \foreach \G in \globalsize {
+        \addplot table[col sep=comma,x=localsize,y=\G]{results-mult-local.csv};
+        \addlegendentryexpanded{\G \ global array size}
       }
      \end{axis}
   \end{tikzpicture}
-  \caption{Performance vs. Trial Count across different block sizes}
+  \caption{Performance vs. Local Work Size across different global sizes}
 \end{figure}
 
 ## Analysis
