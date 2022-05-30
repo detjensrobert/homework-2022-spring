@@ -4,7 +4,7 @@
 // request OpenCL 1.2
 #define CL_TARGET_OPENCL_VERSION 120
 
-#include <CL/cl.h>
+#include "CL/cl.h"
 
 // function prototypes:
 void PrintOpenclInfo();
