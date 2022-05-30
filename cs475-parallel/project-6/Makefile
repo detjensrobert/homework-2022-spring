@@ -1,4 +1,4 @@
-CC = g++ -g -lm -fopenmp -lOpenCL -L/usr/lib64/intel-opencl
+CC = g++ -g -lm -fopenmp -lOpenCL
 
 GLOBAL_WORKS = $(shell ruby -e 'puts (10..23).map {|p| 2**p }')
 LOCAL_WORKS = $(shell ruby -e 'puts (3..9).map {|p| 2**p }')

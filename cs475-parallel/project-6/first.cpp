@@ -1,5 +1,8 @@
 // 1. Program header
 
+// set desired opencl version before including headers
+#define CL_TARGET_OPENCL_VERSION 110
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,7 +10,6 @@
 
 #include <omp.h>
 #include <unistd.h>
-
 
 #include "CL/cl.h"
 #include "CL/cl_platform.h"
