@@ -14,7 +14,7 @@ bench-local: mpi-correlation-csv
 
 bench: mpi-correlation-csv
 	echo numprocs,numelements,perf > results.csv
-	for p in {2..16..2}; do \
+	for p in {2..12..2}; do \
    	mpiexec -mca btl self,tcp -np $$p ./mpi-correlation-csv; \
 	done >> results.csv
 
