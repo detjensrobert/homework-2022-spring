@@ -4,8 +4,8 @@
 #SBATCH -p class
 #SBATCH --constraint=v100
 #SBATCH --gres=gpu:1
-#SBATCH -o montecarlo.out
-#SBATCH -e montecarlo.err
+#SBATCH -o hpc.out
+#SBATCH -e hpc.err
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=detjensr@oregonstate.edu
 

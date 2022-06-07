@@ -1,0 +1,7 @@
+mpi-correlation
+mpi-correlation-*
+bin/
+out
+out.*
+*.csv
+hpc.*
