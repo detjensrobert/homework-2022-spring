@@ -34,11 +34,10 @@
 // nb. this code only supports ascii for simplicity
 
 // print debugging messages?
-#define DEBUG true
-
+#define DEBUG 0
 #define dbg_printf(format, ...)                                                \
   if (DEBUG)                                                                   \
-    fprintf(stderr, (format), ##__VA_ARGS__)
+  fprintf(stderr, (format), ##__VA_ARGS__)
 
 // globals:
 float *all_sums;     // the overall MAXSHIFTS autocorrelation array
@@ -124,7 +123,8 @@ int main(int argc, char *argv[]) {
     }
   } else {
     dbg_printf("rank %i receiving scatter\n", me);
-    MPI_Recv(indiv_signal, indiv_size + MAXSHIFTS, MPI_FLOAT, BOSS, 's', MPI_COMM_WORLD, &status);
+    MPI_Recv(indiv_signal, indiv_size + MAXSHIFTS, MPI_FLOAT, BOSS, 's',
+             MPI_COMM_WORLD, &status);
   }
 
   // each processor does its own autocorrelation:
@@ -152,7 +152,8 @@ int main(int argc, char *argv[]) {
         continue;
 
       dbg_printf("boss gathering from rank %i\n", src);
-      MPI_Recv(tmpSums, MAXSHIFTS, MPI_FLOAT, src, 'g', MPI_COMM_WORLD, &status);
+      MPI_Recv(tmpSums, MAXSHIFTS, MPI_FLOAT, src, 'g', MPI_COMM_WORLD,
+               &status);
       for (int s = 0; s < MAXSHIFTS; s++)
         all_sums[s] += tmpSums[s];
     }
@@ -168,10 +169,14 @@ int main(int argc, char *argv[]) {
     double seconds = time1 - time0;
     double performance = (double)MAXSHIFTS * (double)NUMELEMENTS / seconds /
                          1000000.; // mega-elements computed per second
+#ifndef CSV
     fprintf(stderr,
             "%3d processors, %10d elements, %9.2lf mega-autocorrelations "
             "computed per second\n",
             num_cpus, NUMELEMENTS, performance);
+#else
+    printf("%d,%d,%lf\n", num_cpus, NUMELEMENTS, performance);
+#endif
   }
 
   // write the file to be plotted to look for the secret sine wave:
@@ -181,9 +186,9 @@ int main(int argc, char *argv[]) {
     if (fp == NULL) {
       fprintf(stderr, "Cannot write to plot file '%s'\n", CSVPLOTFILE);
     } else {
-      for (int s = 1; s < MAXPLOT; s++) // BigSums[0] is huge -- don't use it
-      {
-        fprintf(fp, "%6d , %10.2f\n", s, all_sums[s]);
+      fprintf(fp, "sumindex,value\n");
+      for (int s = 1; s < MAXPLOT; s++) { // BigSums[0] is huge -- don't use it
+        fprintf(fp, "%6d,%10.2f\n", s, all_sums[s]);
       }
       fclose(fp);
     }
