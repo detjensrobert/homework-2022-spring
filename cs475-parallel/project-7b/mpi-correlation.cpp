@@ -193,7 +193,7 @@ void do_local_autocorrelation(int me) {
   MPI_Status status;
 
   if (DEBUG)
-    fprintf(stderr, "Node %3d entered DoOneLocalAutocorrelation( )\n", me);
+    fprintf(stderr, "Node %3d entered local_autocorrelation()\n", me);
 
   for (int s = 0; s < MAXSHIFTS; s++) {
     float sum = 0.;
