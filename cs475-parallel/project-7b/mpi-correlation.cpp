@@ -36,6 +36,10 @@
 // print debugging messages?
 #define DEBUG true
 
+#define dbg_printf(format, ...)                                                \
+  if (DEBUG)                                                                   \
+    fprintf(stderr, (format), ##__VA_ARGS__)
+
 // globals:
 float *all_sums;     // the overall MAXSHIFTS autocorrelation array
 float *all_signals;  // the overall NUMELEMENTS-big signal data
@@ -114,10 +118,12 @@ int main(int argc, char *argv[]) {
       if (dst == BOSS)
         continue;
 
+      dbg_printf("boss scattering to rank %i\n", dst);
       MPI_Send(&all_signals[dst * indiv_size], indiv_size + MAXSHIFTS,
                MPI_FLOAT, dst, 's', MPI_COMM_WORLD);
     }
   } else {
+    dbg_printf("rank %i receiving scatter\n", me);
     MPI_Recv(indiv_signal, indiv_size + MAXSHIFTS, MPI_FLOAT, BOSS, 's', MPI_COMM_WORLD, &status);
   }
 
@@ -133,7 +139,8 @@ int main(int argc, char *argv[]) {
           indiv_sums[s]; // start the overall sums with the BOSS's sums
     }
   } else {
-    MPI_Send(indiv_sums, indiv_size, MPI_FLOAT, BOSS, 'g', MPI_COMM_WORLD);
+    dbg_printf("rank %i sending gather\n", me);
+    MPI_Send(indiv_sums, MAXSHIFTS, MPI_FLOAT, BOSS, 'g', MPI_COMM_WORLD);
   }
 
   // receive the sums and add them into the overall sums:
@@ -144,7 +151,8 @@ int main(int argc, char *argv[]) {
       if (src == BOSS)
         continue;
 
-      MPI_Recv(tmpSums, indiv_size, MPI_FLOAT, src, 'g', MPI_COMM_WORLD, &status);
+      dbg_printf("boss gathering from rank %i\n", src);
+      MPI_Recv(tmpSums, MAXSHIFTS, MPI_FLOAT, src, 'g', MPI_COMM_WORLD, &status);
       for (int s = 0; s < MAXSHIFTS; s++)
         all_sums[s] += tmpSums[s];
     }
@@ -192,8 +200,7 @@ int main(int argc, char *argv[]) {
 void do_local_autocorrelation(int me) {
   MPI_Status status;
 
-  if (DEBUG)
-    fprintf(stderr, "Node %3d entered local_autocorrelation()\n", me);
+  dbg_printf("Node %3d entered local_autocorrelation()\n", me);
 
   for (int s = 0; s < MAXSHIFTS; s++) {
     float sum = 0.;
